@@ -1,0 +1,114 @@
+{{ define "email_layout" }}
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <style type="text/css">
+            body {
+                font-family: Arial, sans-serif;;
+                font-size: 16px;
+                height: 100% !important;
+                width: 100% !important;
+                color: #2c2c2c !important;
+                margin: 0px;
+                padding: 0px;
+                -ms-text-size-adjust: 100%;
+                -webkit-text-size-adjust: 100%;
+                line-height: 1.5;
+            }
+
+            a {
+                color: inherit !important;
+            }
+
+            h1 {
+                padding: 20px;
+                padding-left: 00px;
+                margin-bottom: 0px;
+                font-size: 1.8em;
+            }
+
+            h1 a {
+                color: #6C6C6C !important;
+                text-decoration: none;
+                font-weight: normal;
+            }
+
+
+            h4 {
+                font-size: 1.77em;
+                line-height: 1.4em;
+                margin-bottom: 15px;
+            }
+
+            h5 {
+                font-size: 1.57em;
+                line-height: 1.4em;
+                margin-bottom: 15px;
+            }
+
+            .wrapper {
+                height: 100% !important;
+                width: 100% !important;
+            }
+
+            .container {
+                width: 90%;
+                margin-left: 10px;
+                margin-bottom: 30px;
+            }
+
+            .card {
+                margin-bottom: 30px;
+            }
+
+            .btn {
+                border-radius: 20px;
+                padding: 10px;
+                display: inline-block;
+                text-align: center;
+                text-decoration: none;
+                background-color: #51cbce !important;
+                color: #ffffff !important;
+                padding-left: 20px;
+                padding-right: 20px;
+                text-transform: uppercase;
+                font-weight: bold;
+            }
+
+            .btn-center {
+                width: 50%;
+                margin-left: 25%;
+            }
+
+            .blockquote {
+                text-align: left;
+                background-color: #f6f6f6;
+                padding: 10px 20px;
+                border-radius: 10px;
+                max-width: 600px;
+                margin-top: 15px;
+                margin-bottom: 15px;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="card">
+                <h4>{{.SUBJECT}}</h4>
+
+                {{ template "main" . }}
+
+                <p style="padding-top: 22px;">
+                    You’re welcome,<br />
+                    <strong>Spotter Bot</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+    </body>
+    </html>
+{{ end }}

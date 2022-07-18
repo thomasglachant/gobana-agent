@@ -1,0 +1,29 @@
+{{ template "email_layout" . }}
+
+{{ define "main" }}
+    <div style="margin-bottom: 15px;">
+        {{ if .Metadata.Application }}
+            <div>Application : <strong>{{ .Metadata.Application }}</strong></div>
+        {{ end }}
+        {{ if .Metadata.Server }}
+            <div>Server : <strong>{{ .Metadata.Server }}</strong></div>
+        {{ end }}
+        <div>Number of logs : <strong>{{ len .Alerts }}</strong></div>
+    </div>
+
+    {{ range $i, $alert := .Alerts }}
+        <h5>Alert #{{ $i }}</h5>
+        <div style="margin-bottom: 15px;">
+            <div>Date : <strong>{{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}</strong></div>
+            <div>File : <strong>{{ $alert.Filename }}</strong></div>
+            <div>
+                Patterns :
+                <strong>{{ range $index, $pattern := $alert.Patterns}}{{if $index}}, {{end}}{{$pattern}}{{end}}</strong>
+
+                <div class="blockquote">
+                    {{ $alert.Content }}
+                </div>
+            </div>
+        </div>
+    {{ end }}
+{{ end }}

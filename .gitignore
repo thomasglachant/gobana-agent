@@ -1,0 +1,42 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# goland
+.idea
+
+# mac
+.DS_Store
+
+# exec
+bin/*
+!bin/.gitkeep
+
+# log
+log/*
+!log/.gitkeep
+
+# vendors
+vendor
+.gopath~
+
+# env
+env/*
+!env.yml.dist
+
+# var
+var/*
+!var/.gitkeep
+dist/
+
+
+config.yaml

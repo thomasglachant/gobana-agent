@@ -1,0 +1,17 @@
+##  *New alert on {{ .Metadata.Application }}*  ##
+Server : `{{ .Metadata.Server }}`    Number of logs : `{{ len .Alerts }}`
+
+{{ range $i, $alert := .Alerts }}
+{{if $i}}
+
+{{end}}
+----- Alert #{{ $i }} -----
+Date : {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
+File : `{{ $alert.Filename }}`
+Patterns : {{ range $index, $pattern := $alert.Patterns}}{{if $index}}, {{end}}`{{$pattern}}`{{end}}
+
+```
+{{ $alert.Content }}
+```
+
+{{ end }}
