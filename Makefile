@@ -26,14 +26,14 @@ build: $(BASE) ; $(info $(M) building executable…) @ ## Build program binary (
 		-o $(BIN)/$(APPNAME) *.go
 
 $(GOLINT): | $(BASE) ; $(info $(M) building lint…)
-	$Q GOPATH=$(shell go env GOPATH) go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.30.0
+	$Q GOPATH=$(shell go env GOPATH) go install github.com/golangci/golangci-lint/cmd/golangci-lint
 
 .PHONY: lint
 lint: $(BASE) $(GOLINT) ; $(info $(M) running lint…) @ ## Run lint
 	$Q cd $(BASE) && $(GOLINT) run --color auto --fix
 
 $(GOFMT): | $(BASE) ; $(info $(M) building fmt…)
-	$Q GOPATH=$(shell go env GOPATH) go get mvdan.cc/gofumpt
+	$Q GOPATH=$(shell go env GOPATH) go install mvdan.cc/gofumpt
 
 .PHONY: fmt
 fmt: $(BASE) $(GOFMT) ; $(info $(M) running gofmt…) @ ## Run gofmt on all source files

@@ -2,7 +2,7 @@
 
 ## Configuration
 
-First, you must create a configuration file.
+First, you must create a configuration file `config.yml`.
 
 ```yaml
 ########################
@@ -52,8 +52,6 @@ client:
         ssl_enabled: false
         from_email: "np-reply@spotted.local"
         from_name: "Spotter Bot"
-        
-
 ```
 
 ## Build and run
