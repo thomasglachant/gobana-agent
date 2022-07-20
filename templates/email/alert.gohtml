@@ -1,28 +1,88 @@
 {{ template "email_layout" . }}
 
 {{ define "main" }}
-    <div style="margin-bottom: 15px;">
-        {{ if .Metadata.Application }}
-            <div>Application : <strong>{{ .Metadata.Application }}</strong></div>
-        {{ end }}
-        {{ if .Metadata.Server }}
-            <div>Server : <strong>{{ .Metadata.Server }}</strong></div>
-        {{ end }}
-        <div>Number of logs : <strong>{{ len .Alerts }}</strong></div>
-    </div>
+    <table>
+        <tr>
+            <td style="width:34%; text-align: left;">
+                {{ if .Metadata.Application }}
+                    <div class="label">
+                        APPLICATION
+                    </div>
+                    <div class="value">
+                        {{ .Metadata.Application }}
+                    </div>
+                {{ end }}
+            </td>
+            <td style="width:33%; text-align: center;">
+                {{ if .Metadata.Server }}
+                    <div class="label">
+                        SERVER
+                    </div>
+                    <div class="value">
+                        {{ .Metadata.Server }}
+                    </div>
+                {{ end }}
+            </td>
+            <td style="width:33%; text-align: right;">
+                <div class="label">
+                    OCCURRENCES
+                </div>
+                <div class="value">
+                    {{ len .Alerts }}
+                </div>
+            </td>
+        </tr>
+    </table>
 
     {{ range $i, $alert := .Alerts }}
-        <h5>Alert #{{ $i }}</h5>
-        <div style="margin-bottom: 15px;">
-            <div>Date : <strong>{{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}</strong></div>
-            <div>File : <strong>{{ $alert.Filename }}</strong></div>
-            <div>
-                Patterns :
-                <strong>{{ range $index, $pattern := $alert.Patterns}}{{if $index}}, {{end}}{{$pattern}}{{end}}</strong>
+        {{ if $i }}
+            <br />
+        {{ end }}
+        <div style="
+            text-align: center;
+            background-color: #fff2c7;
+            margin-top: 25px;
+            font-weight: bold;
+            padding: 6px 0;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        ">
+            Alert #{{ $i }}
+        </div>
 
-                <div class="blockquote">
-                    {{ $alert.Content }}
+        <div style="margin-bottom: 15px;">
+            <table style="margin-bottom: 10px">
+                <tr>
+                    <td style="width: 50%">
+                        <div class="label">DATE</div>
+                        <div class="value">
+                            {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
+                        </div>
+                    </td>
+                    <td style="width: 50%">
+                        <div class="label">
+                            PATTERNS
+                        </div>
+                        <div class="value">
+                            {{ range $index, $pattern := $alert.Patterns}}{{if $index}}, {{end}}{{$pattern}}{{end}}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="field">
+                <div class="label">FILE</div>
+                <div class="value">
+                    {{ $alert.Filename }}
                 </div>
+            </div>
+
+            <div class="label" style="margin-top: 15px; margin-bottom: 7px;">
+                MESSAGE
+            </div>
+            <div class="blockquote_fat">
+                {{ $alert.Content }}
             </div>
         </div>
     {{ end }}

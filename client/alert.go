@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"spotter/core"
+	"spooter/core"
 )
 
 const (

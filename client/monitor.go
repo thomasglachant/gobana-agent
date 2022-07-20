@@ -10,7 +10,7 @@ import (
 
 	"github.com/hpcloud/tail"
 
-	"spotter/core"
+	"spooter/core"
 )
 
 const (

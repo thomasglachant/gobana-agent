@@ -1,5 +1,5 @@
-APPNAME  = spotter
-PACKAGE  = github.com/thomasglachant/spotter
+APPNAME  = spooter
+PACKAGE  = github.com/thomasglachant/spooter
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat $(CURDIR)/.version 2> /dev/null || echo v0)

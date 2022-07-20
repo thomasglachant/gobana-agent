@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"spotter/core"
+	"spooter/core"
 
 	"golang.org/x/exp/slices"
 )

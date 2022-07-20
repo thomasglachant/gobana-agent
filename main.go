@@ -8,11 +8,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"spotter/client"
+	"spooter/client"
 
 	yaml "gopkg.in/yaml.v3"
 
-	"spotter/core"
+	"spooter/core"
 )
 
 const logPrefix = "main"
@@ -25,12 +25,17 @@ var date string
 //go:embed templates/**/*
 var templateFs embed.FS
 
+// Filesystem which contains assets
+//go:embed assets/**/*
+var assetFs embed.FS
+
 //nolint:funlen
 func main() {
-	// setup embedded template fs to core
+	// setup embedded fs to core
 	core.TemplateFs = templateFs
+	core.AssetFs = assetFs
 
-	fmt.Printf("# spotted v.%s (%s)\n", version, date)
+	fmt.Printf("# spooter v%s (%s)\n", version, date)
 
 	var clientFlag bool
 	flag.BoolVar(&clientFlag, "client", false, "Enable/disable clientFlag mode")
@@ -43,7 +48,7 @@ func main() {
 
 	// resolve default config file
 	if configFile == "" && clientFlag {
-		configFile = "/etc/spotted/client.yml"
+		configFile = "/etc/spooter/client.yml"
 	}
 
 	/*

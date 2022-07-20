@@ -1,4 +1,4 @@
-# Spotter
+# spooter
 
 ## Configuration
 
@@ -39,10 +39,10 @@ client:
         subscriptions:
             -   type: "email"
                 value: "user@localhost.local"
-                lookups: [ "symfony" ]
+                lookups: [ "php-symfony" ]
             -   type: "slack"
                 value: "https://hooks.slack.com/services/XXXXXXXX/XXXXXXXXX/XXXXXXXX"
-                lookups: [ "symfony" ]
+                lookups: [ "nginx" ]
                 
     smtp:
         host: "localhost"
@@ -50,8 +50,8 @@ client:
         username: ""
         password: ""
         ssl_enabled: false
-        from_email: "np-reply@spotted.local"
-        from_name: "Spotter Bot"
+        from_email: "np-reply@spooter.local"
+        from_name: "Spooter Bot"
 ```
 
 ## Build and run
@@ -67,5 +67,5 @@ make start-client config=config.yaml
 
 Run using command line :
 ```bash
-./spotter -client -config=config.yaml
+./spooter -client -config=config.yaml
 ```

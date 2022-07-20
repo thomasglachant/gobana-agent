@@ -3,8 +3,8 @@ package core
 import (
 	"bytes"
 	"embed"
-	"html/template"
-	htmlTemplate "text/template"
+	htmlTemplate "html/template"
+	"text/template"
 )
 
 var TemplateFs embed.FS

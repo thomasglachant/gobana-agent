@@ -8,11 +8,11 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-          - (github.com/thomasglachant/spotter/core.LogInterface).Criticalf
-          - (github.com/thomasglachant/spotter/core.LogInterface).Infof
-          - (github.com/thomasglachant/spotter/core.LogInterface).Errorf
-          - (github.com/thomasglachant/spotter/core.LogInterface).Noticef
-          - (github.com/thomasglachant/spotter/core.LogInterface).Debugf
+          - (github.com/thomasglachant/spooter/core.LogInterface).Criticalf
+          - (github.com/thomasglachant/spooter/core.LogInterface).Infof
+          - (github.com/thomasglachant/spooter/core.LogInterface).Errorf
+          - (github.com/thomasglachant/spooter/core.LogInterface).Noticef
+          - (github.com/thomasglachant/spooter/core.LogInterface).Debugf
   gocyclo:
     min-complexity: 15
   dupl:
@@ -21,7 +21,7 @@ linters-settings:
     lines: 100
     statements: 50
   gci:
-    local-prefixes: github.com/thomasglachant/spotter
+    local-prefixes: github.com/thomasglachant/spooter
   goconst:
     min-len: 2
     min-occurrences: 2
@@ -38,7 +38,7 @@ linters-settings:
   lll:
     line-length: 140
   goimports:
-    local-prefixes: github.com/thomasglachant/spotter
+    local-prefixes: github.com/thomasglachant/spooter
   gocritic:
     enabled-tags:
       - diagnostic
