@@ -1,3 +1,4 @@
+//nolint:goconst
 package core
 
 import (
@@ -30,7 +31,7 @@ type ParserConfig struct {
 	Mode          string            `yaml:"mode" validate:"required,oneof=json regex"`
 	RegexPattern  string            `yaml:"regex_pattern" validate:"required_if=Mode regex"`
 	RegexFields   []string          `yaml:"regex_fields" validate:"required_if=Mode regex,dive,required"`
-	JsonFields    map[string]string `yaml:"json_fields" validate:"required_if=Mode json,dive,required"`
+	JSONFields    map[string]string `yaml:"json_fields" validate:"required_if=Mode json,dive,required"`
 	FilesIncluded []string          `yaml:"files_included" validate:"required,gte=1,dive,required"`
 	FilesExcluded []string          `yaml:"files_excluded" validate:"dive,file,required"`
 }
@@ -80,6 +81,7 @@ func (s *ConfigStruct) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
+//nolint:gocyclo
 func CheckConfig(config *ConfigStruct) error {
 	// apply validator
 	validate := validator.New()
@@ -91,29 +93,30 @@ func CheckConfig(config *ConfigStruct) error {
 
 		for _, err := range err.(validator.ValidationErrors) {
 			field := strings.Join(strings.Split(err.Namespace(), ".")[1:], ".")
-			if err.Tag() == "required" {
+			switch {
+			case err.Tag() == "required":
 				return fmt.Errorf("\"%s\" is required", field)
-			} else if err.Tag() == "oneof" {
+			case err.Tag() == "oneof":
 				return fmt.Errorf("\"%s\" must be one of \"%s\"", field, strings.Join(strings.Split(err.Param(), " "), "\", \""))
-			} else if err.Kind().String() == "slice" && err.Tag() == "lt" {
+			case err.Kind().String() == "slice" && err.Tag() == "lt":
 				return fmt.Errorf("\"%s\" must contains less than %s item(s)", field, err.Param())
-			} else if err.Kind().String() == "slice" && err.Tag() == "lte" {
+			case err.Kind().String() == "slice" && err.Tag() == "lte":
 				return fmt.Errorf("\"%s\" must contains maximum %s item(s)", field, err.Param())
-			} else if err.Kind().String() == "slice" && err.Tag() == "gt" {
+			case err.Kind().String() == "slice" && err.Tag() == "gt":
 				return fmt.Errorf("\"%s\" must contains more than %s item(s)", field, err.Param())
-			} else if err.Kind().String() == "slice" && err.Tag() == "gte" {
+			case err.Kind().String() == "slice" && err.Tag() == "gte":
 				return fmt.Errorf("\"%s\" must contains at least %s item(s)", field, err.Param())
-			} else if err.Tag() == "eq" {
+			case err.Tag() == "eq":
 				return fmt.Errorf("\"%s\" must be equal to \"%s\"", field, err.Param())
-			} else if err.Tag() == "ne" {
+			case err.Tag() == "ne":
 				return fmt.Errorf("\"%s\" must not be equal to \"%s\"", field, err.Param())
-			} else if err.Kind().String() == "slice" && err.Tag() == "unique" && err.Param() != "" {
+			case err.Kind().String() == "slice" && err.Tag() == "unique" && err.Param() != "":
 				return fmt.Errorf("\"%s.%s\" property must be unique", field, err.Param())
-			} else if err.Kind().String() == "slice" && err.Tag() == "unique" {
+			case err.Kind().String() == "slice" && err.Tag() == "unique":
 				return fmt.Errorf("\"%s\" entries must be unique", field)
-			} else if err.Tag() == "required_if" {
+			case err.Tag() == "required_if":
 				return fmt.Errorf("\"%s\" is required when %s is \"%s\"", field, strings.Split(err.Param(), " ")[0], strings.Split(err.Param(), " ")[1])
-			} else {
+			default:
 				return fmt.Errorf("\"%s\" fails to validate constraint \"%s\"", field, err.Tag())
 			}
 		}

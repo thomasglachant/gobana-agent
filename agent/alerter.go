@@ -12,6 +12,7 @@ import (
 
 const (
 	alerterLogPrefix = "alerter"
+	alerterTimer     = 10 * time.Second
 
 	TriggerTypeRegex        = "match_regex"
 	TriggerTypeEqual        = "is"
@@ -63,7 +64,7 @@ func (alerter *Alerter) Run() error {
 	})
 	defer core.EventDispatcher.Unsubscribe(subscriptionID)
 
-	core.ProcessInfiniteLoop(10*time.Second, alerter.exitChan, func() {
+	core.ProcessInfiniteLoop(alerterTimer, alerter.exitChan, func() {
 		// flush pending alerts
 		alerter.flush()
 	})
@@ -107,11 +108,12 @@ func HandleParserTrigger(data core.EventData) {
 			allFieldsMatch := true
 			for _, triggerValue := range trigger.Values {
 				fieldValue := ""
-				if triggerValue.Field == "_parser" {
+				switch {
+				case triggerValue.Field == "_parser":
 					fieldValue = line.Metadata.Parser
-				} else if triggerValue.Field == "_filename" {
+				case triggerValue.Field == "_filename":
 					fieldValue = line.Metadata.Filename
-				} else {
+				default:
 					if _, ok := line.Fields[triggerValue.Field]; !ok {
 						core.Logger.Errorf(alerterLogPrefix, "unable to check field value (field \"%s\" not exists)", triggerValue.Field)
 						continue

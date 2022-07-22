@@ -9,7 +9,7 @@ import (
 )
 
 func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]interface{}) error {
-	if CheckEmailTemplateExists(template) == false {
+	if !CheckEmailTemplateExists(template) {
 		return fmt.Errorf("email template %s does not exist", template)
 	}
 

@@ -29,7 +29,7 @@ var templateFs embed.FS
 //go:embed assets/**/*
 var assetFs embed.FS
 
-//nolint:funlen
+//nolint:funlen, gocyclo
 func main() {
 	// setup embedded fs to core
 	core.TemplateFs = templateFs

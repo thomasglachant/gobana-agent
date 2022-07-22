@@ -19,6 +19,7 @@ import (
 
 const (
 	watcherLogPrefix = "watcher"
+	watcherTimer     = 1 * time.Second
 
 	eventNameLogDiscover = "agent.log.discover"
 
@@ -44,14 +45,12 @@ func (watcher *Watcher) Run() error {
 	watcher.currentTails = map[string]*currentWatching{}
 	watcher.exitChan = make(chan bool)
 
-	core.ProcessInfiniteLoop(1*time.Second, watcher.exitChan, func() {
+	core.ProcessInfiniteLoop(watcherTimer, watcher.exitChan, func() {
 		// execute watcher
 		if err := watcher.discoverFilesToWatch(); err != nil {
 			core.Logger.Errorf(watcherLogPrefix, "Error while discover files to watch: %s", err)
 		}
-		if err := watcher.cleanUpVanishedFiles(); err != nil {
-			core.Logger.Errorf(watcherLogPrefix, "Error while cleanup vanished files: %s", err)
-		}
+		watcher.cleanUpVanishedFiles()
 	})
 
 	return nil
@@ -64,13 +63,12 @@ func (watcher *Watcher) HandleStop() {
 	watcher.exitChan <- true
 }
 
-func (watcher *Watcher) cleanUpVanishedFiles() error {
+func (watcher *Watcher) cleanUpVanishedFiles() {
 	for k, v := range watcher.currentTails {
 		if _, err := os.Stat(v.fileName); err != nil {
 			watcher.endWatchFromTailKey(k)
 		}
 	}
-	return nil
 }
 
 func (watcher *Watcher) discoverFilesToWatch() error {
@@ -189,6 +187,7 @@ type LogLine struct {
 	Fields   map[string]string
 }
 
+//nolint:gocyclo
 func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*LogLine, error) {
 	log := &LogLine{
 		Metadata: LogMetadata{
@@ -203,7 +202,8 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 		Fields: map[string]string{},
 	}
 
-	if fileWatcher.parser.Mode == ParserModeRegex {
+	switch {
+	case fileWatcher.parser.Mode == ParserModeRegex:
 		var regex *regexp.Regexp
 		var ok bool
 		if regex, ok = watcher.regexCache[fileWatcher.parser.Name]; !ok {
@@ -212,7 +212,6 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 			regex = watcher.regexCache[fileWatcher.parser.Name]
 			watcher.mu.Unlock()
 		}
-
 		matches := regex.FindStringSubmatch(line)
 		if len(matches) > 0 {
 			i := 1
@@ -221,13 +220,12 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 				i += 1
 			}
 		}
-	} else if fileWatcher.parser.Mode == ParserModeJSON {
+	case fileWatcher.parser.Mode == ParserModeJSON:
 		jsonData := map[string]interface{}{}
 		if err := json.Unmarshal([]byte(line), &jsonData); err != nil {
 			return nil, fmt.Errorf("unable to parse line as json: %s", err)
 		}
-
-		for internalFieldName, jsonField := range fileWatcher.parser.JsonFields {
+		for internalFieldName, jsonField := range fileWatcher.parser.JSONFields {
 			// json field contain "." => use json path
 			if strings.Contains(jsonField, ".") {
 				splitByDot := strings.Split(jsonField, ".")
@@ -273,7 +271,7 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 				log.Fields[internalFieldName] = fmt.Sprintf("%v", jsonData[jsonField])
 			}
 		}
-	} else {
+	default:
 		return nil, fmt.Errorf("unknown mode %s", fileWatcher.parser.Mode)
 	}
 
