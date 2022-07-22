@@ -44,7 +44,7 @@ linters-settings:
       - diagnostic
       - experimental
       - opinionated
-      - performance
+#      - performance
       - style
     disabled-checks:
       - dupImport # https://github.com/go-critic/go-critic/issues/845
