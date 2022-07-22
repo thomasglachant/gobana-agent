@@ -32,6 +32,7 @@ agent:
                 date: "datetime"
                 level: "level_name"
                 message: "message"
+                user: "extra.user" # separate fields by "." to capture inner fields
             
             # File list to include (required)
             # can contains "*" to match pattern or "**" to match all files.  

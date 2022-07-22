@@ -29,7 +29,7 @@ fi
 
 for i in $(seq 1 "${NUMBER}"); do
 	if test "${TYPE}" = "json"; then
-		echo '{"message":"msg","level":400,"context":{"filename": "toto.php"}, "level_name":"'"${LEVEL}"'","channel":"request","datetime":"'${CUR_DATE}'","extra":{}}'>> "${FILENAME}"
+		echo '{"message":"msg","level":400,"context":{"filename": "toto.php"}, "level_name":"'"${LEVEL}"'","channel":"request","datetime":"'${CUR_DATE}'","extra":{"app_user": "be78bf26-3714-43da-aa92-bd4a7be29d22"}}'>> "${FILENAME}"
 	elif test "${TYPE}" = "symfony"; then
 		echo "[${CUR_DATE}] request.${LEVEL}: My message []" >> "${FILENAME}"
 	else

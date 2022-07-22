@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -145,7 +146,7 @@ func (watcher *Watcher) startWatchFile(parser *core.ParserConfig, file string) {
 
 		core.Logger.Debugf(watcherLogPrefix, "Line handled")
 		for k, v := range log.Fields {
-			core.Logger.Debugf(watcherLogPrefix, "Field %s: %s", k, v)
+			core.Logger.Infof(watcherLogPrefix, "Field %s: %s", k, v)
 		}
 
 		core.EventDispatcher.Dispatch(eventNameLogDiscover, core.EventData{
@@ -227,9 +228,25 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 		}
 
 		for internalFieldName, jsonField := range fileWatcher.parser.JsonFields {
+			// json field contain "." => use json path
+			if strings.Contains(jsonField, ".") {
+				splitByDot := strings.Split(jsonField, ".")
+				var cur interface{} = jsonData
+				if len(splitByDot) > 1 {
+					for _, part := range splitByDot {
+						if _, ok := cur.(map[string]interface{})[part]; ok {
+							cur = cur.(map[string]interface{})[part]
+						} else {
+							cur = nil
+							break
+						}
+					}
+					jsonData[jsonField] = cur
+				}
+			}
+
 			// jsonField not exists
 			if _, ok := jsonData[jsonField]; !ok {
-				log.Fields[internalFieldName] = ""
 				continue
 			}
 			// jsonField is nil
