@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"spooter/client"
+	"spooter/agent"
 
 	yaml "gopkg.in/yaml.v3"
 
@@ -37,8 +37,8 @@ func main() {
 
 	fmt.Printf("# spooter v%s (%s)\n", version, date)
 
-	var clientFlag bool
-	flag.BoolVar(&clientFlag, "client", false, "Enable/disable clientFlag mode")
+	var agentFlag bool
+	flag.BoolVar(&agentFlag, "agent", false, "Enable/disable agent mode")
 
 	var configFile string
 	flag.StringVar(&configFile, "config", "", "Path to config file")
@@ -47,23 +47,13 @@ func main() {
 	flag.Parse()
 
 	// resolve default config file
-	if configFile == "" && clientFlag {
-		configFile = "/etc/spooter/client.yml"
+	if configFile == "" && agentFlag {
+		configFile = "/etc/spooter/agent.yml"
 	}
 
 	/*
 	   Gen config
 	*/
-	//
-	// config with default values
-	//
-	cnf := &core.ConfigStruct{
-		Client: core.ConfigClient{
-			Metadata: core.MetadataConfig{},
-			Mode:     "standalone",
-		},
-	}
-
 	//
 	// load config from file
 	//
@@ -73,21 +63,27 @@ func main() {
 	if readErr != nil {
 		core.Logger.Criticalf(logPrefix, "unable to open config file : %s", readErr)
 	}
-	if err := yaml.Unmarshal(data, cnf); err != nil {
+	if err := yaml.Unmarshal(data, &core.AppConfig); err != nil {
 		core.Logger.Criticalf(logPrefix, "unable to decode config : %s", err)
+	}
+
+	core.Logger.Infof(logPrefix, "Validate config file")
+	validationErr := core.CheckConfig(core.AppConfig)
+	if validationErr != nil {
+		core.Logger.Criticalf(logPrefix, "Invalid config file : %s", validationErr)
 	}
 
 	/*
 	   Start App
 	*/
-	if !clientFlag {
-		core.Logger.Criticalf(logPrefix, "You must add \"-client\" argument")
+	if !agentFlag {
+		core.Logger.Criticalf(logPrefix, "You must add \"-agent\" argument")
 	}
 
 	// enable services
 	processesToRun := []core.ProcessInterface{}
-	if clientFlag {
-		processes, err := client.GetProcesses(cnf)
+	if agentFlag {
+		processes, err := agent.GetProcesses()
 		if err != nil {
 			core.Logger.Criticalf(logPrefix, "unable to get processes : %s", err)
 		}
@@ -137,4 +133,6 @@ func main() {
 	for i := 0; i < len(processesToRun); i++ {
 		<-c
 	}
+
+	core.Logger.Infof(logPrefix, "All processes exited")
 }

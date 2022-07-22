@@ -3,11 +3,16 @@ package core
 import (
 	"crypto/tls"
 	"fmt"
+	"os"
 
 	gomail "gopkg.in/mail.v2"
 )
 
-func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]interface{}) {
+func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]interface{}) error {
+	if CheckEmailTemplateExists(template) == false {
+		return fmt.Errorf("email template %s does not exist", template)
+	}
+
 	vars["SUBJECT"] = subject
 
 	m := gomail.NewMessage()
@@ -33,6 +38,19 @@ func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]i
 	}
 
 	if err := d.DialAndSend(m); err != nil {
-		Logger.Errorf("smtp", "unable to send email : %s", err)
+		return fmt.Errorf("unable to send email : %s", err)
 	}
+
+	return nil
+}
+
+func CheckEmailTemplateExists(template string) bool {
+	if _, err := os.Stat(fmt.Sprintf("templates/email/%s.txt.tmpl", template)); err != nil {
+		return false
+	}
+	if _, err := os.Stat(fmt.Sprintf("templates/email/%s.gohtml", template)); err != nil {
+		return false
+	}
+
+	return true
 }

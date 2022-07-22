@@ -18,7 +18,7 @@
 .DS_Store
 
 # exec
-bin/*
+bin/spooter
 !bin/.gitkeep
 
 # log
@@ -39,4 +39,4 @@ var/*
 dist/
 
 
-config.yaml
+config_agent.yaml

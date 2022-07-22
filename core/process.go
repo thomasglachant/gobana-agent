@@ -2,7 +2,10 @@ package core
 
 import (
 	"reflect"
+	"time"
 )
+
+const ProcessInfiniteLoopDelay = 100 * time.Millisecond
 
 /*
  * Process interface.
@@ -51,4 +54,25 @@ func (process *ProcessStruct) IsRunning() bool {
 
 func (process *ProcessStruct) GetName() string {
 	return reflect.Indirect(reflect.ValueOf(process.RunningProcess)).Type().String()
+}
+
+func ProcessInfiniteLoop(delay time.Duration, exitChan chan bool, handler func()) {
+	askForStop := false
+	var lastExecution time.Time
+
+	go func() {
+		askForStop = <-exitChan
+	}()
+
+	for !askForStop {
+		if time.Now().Before(lastExecution.Add(delay)) {
+			time.Sleep(ProcessInfiniteLoopDelay)
+
+			continue
+		}
+		lastExecution = time.Now()
+
+		// run
+		handler()
+	}
 }

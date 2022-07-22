@@ -60,12 +60,20 @@
                             {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
                         </div>
                     </td>
-                    <td style="width: 50%">
+                    <td style="width: 15%">
                         <div class="label">
-                            PATTERNS
+                            Parser
                         </div>
                         <div class="value">
-                            {{ range $index, $pattern := $alert.Patterns}}{{if $index}}, {{end}}{{$pattern}}{{end}}
+                            {{ $alert.ParserName }}
+                        </div>
+                    </td>
+                    <td style="width: 35%; text-align: right">
+                        <div class="label">
+                            Trigger
+                        </div>
+                        <div class="value">
+                            {{ $alert.TriggerName }}
                         </div>
                     </td>
                 </tr>

@@ -41,9 +41,9 @@ fmt: $(BASE) $(GOFMT) ; $(info $(M) running gofmt…) @ ## Run gofmt on all sour
 		$(GOFMT) -l -w $$d/*.go || ret=$$? ; \
 	 done ; exit $$ret
 
-.PHONY: start-client
-start-client: build $(BASE) ; $(info $(M) launch app...) @ ## Launch application
-	@$(BIN)/$(APPNAME) $(RUN_ARGS) -client -config=$(config)
+.PHONY: start-agent
+start-agent: build $(BASE) ; $(info $(M) launch app...) @ ## Launch application
+	@$(BIN)/$(APPNAME) $(RUN_ARGS) -agent -config=$(config)
 
 .PHONY: clean
 clean: ; $(info $(M) cleaning…)	@ ## Cleanup everything
@@ -52,7 +52,10 @@ clean: ; $(info $(M) cleaning…)	@ ## Cleanup everything
 	@rm -rf test/tests.* test/coverage.*
 
 .PHONY: test
-test: fmt lint build ## Run tests
+test: fmt lint build test-unit ## Run tests
+
+.PHONY: test-unit
+test-unit:  ## Run tests
 	$(info $(M) run tests…)
 	$(GO) test -v ./...
 
