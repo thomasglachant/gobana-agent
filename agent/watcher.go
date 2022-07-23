@@ -144,7 +144,7 @@ func (watcher *Watcher) startWatchFile(parser *core.ParserConfig, file string) {
 
 		core.Logger.Debugf(watcherLogPrefix, "Line handled")
 		for k, v := range log.Fields {
-			core.Logger.Infof(watcherLogPrefix, "Field %s: %s", k, v)
+			core.Logger.Debugf(watcherLogPrefix, "Field %s: %s", k, v)
 		}
 
 		core.EventDispatcher.Dispatch(eventNameLogDiscover, core.EventData{
