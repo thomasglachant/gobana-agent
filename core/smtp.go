@@ -3,8 +3,6 @@ package core
 import (
 	"crypto/tls"
 	"fmt"
-	"os"
-
 	gomail "gopkg.in/mail.v2"
 )
 
@@ -45,12 +43,11 @@ func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]i
 }
 
 func CheckEmailTemplateExists(template string) bool {
-	if _, err := os.Stat(fmt.Sprintf("templates/email/%s.txt.tmpl", template)); err != nil {
+	if !CheckTemplateExists(fmt.Sprintf("templates/email/%s.txt.tmpl", template)) {
 		return false
 	}
-	if _, err := os.Stat(fmt.Sprintf("templates/email/%s.gohtml", template)); err != nil {
+	if !CheckTemplateExists(fmt.Sprintf("templates/email/%s.gohtml", template)) {
 		return false
 	}
-
 	return true
 }
