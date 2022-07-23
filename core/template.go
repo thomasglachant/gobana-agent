@@ -45,8 +45,8 @@ func TemplateToHTML(templates []string, vars map[string]interface{}) string {
 	return tpl.String()
 }
 
-func CheckTemplateExists(template string) bool {
-	if _, err := TemplateFs.Open(template); err != nil {
+func CheckTemplateExists(filename string) bool {
+	if _, err := TemplateFs.Open(filename); err != nil {
 		return false
 	}
 	return true

@@ -3,12 +3,13 @@ package core
 import (
 	"crypto/tls"
 	"fmt"
+
 	gomail "gopkg.in/mail.v2"
 )
 
 func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]interface{}) error {
 	if !CheckEmailTemplateExists(template) {
-		return fmt.Errorf("email template %s does not exist", template)
+		return fmt.Errorf("email template \"%s\" does not exist", template)
 	}
 
 	vars["SUBJECT"] = subject
