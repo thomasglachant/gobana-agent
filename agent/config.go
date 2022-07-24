@@ -9,7 +9,6 @@ import (
 var agentConfig = &AgentConfig{}
 
 func loadConfig(configFile string) error {
-	core.Logger.Infof(logPrefix, "load config from %s", configFile)
 	agentConfig = &AgentConfig{}
 	if err := core.ReadConfig(configFile, agentConfig); err != nil {
 		return err

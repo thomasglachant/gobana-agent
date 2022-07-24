@@ -25,6 +25,8 @@ const (
 
 type Alert struct {
 	Date        time.Time
+	Application string
+	Server      string
 	Filename    string
 	ParserName  string
 	TriggerName string
@@ -135,6 +137,8 @@ func HandleParserTrigger(data core.EventData) {
 				core.Logger.Infof(alerterLogPrefix, "Line match with trigger \"%s\"", trigger.Name)
 				alerter.addAlert(&Alert{
 					Date:        time.Now(),
+					Application: agentConfig.Application,
+					Server:      agentConfig.Server,
 					Filename:    line.Metadata.Filename,
 					ParserName:  line.Metadata.Parser,
 					TriggerName: trigger.Name,

@@ -34,7 +34,7 @@ func ReadConfig(filename string, config interface{}) error {
 
 	validationErr := CheckConfig(config)
 	if validationErr != nil {
-		return fmt.Errorf("invalid config file : %s", validationErr)
+		return fmt.Errorf("validation error : %s", validationErr)
 	}
 
 	return nil
