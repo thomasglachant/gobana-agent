@@ -57,16 +57,16 @@ nfpms:
       
       bindir: /usr/bin
       contents:
-          - src: ../resources/dist/init/spooter_agent.service
+          - src: ./resources/dist/init/spooter_agent.service
             dst: /lib/systemd/system/spooter_agent.service
-          - src: ../resources/dist/config/spooter_agent.yaml
+          - src: ./resources/dist/config/spooter_agent.yaml
             dst: /etc/spooter/agent.yaml
             type: config
       
       scripts:
-          postinstall: ../resources/dist/scripts/postinstall_agent.sh
-          preremove: ../resources/dist/scripts/preremove_agent.sh
-          postremove: ../resources/dist/scripts/postremove_agent.sh
+          postinstall: ./resources/dist/scripts/postinstall_agent.sh
+          preremove: ./resources/dist/scripts/preremove_agent.sh
+          postremove: ./resources/dist/scripts/postremove_agent.sh
           
     - id: server
       package_name: spooter-server
@@ -80,16 +80,16 @@ nfpms:
       
       bindir: /usr/bin
       contents:
-          - src: ../resources/dist/init/spooter_server.service
+          - src: ./resources/dist/init/spooter_server.service
             dst: /lib/systemd/system/spooter_server.service
-          - src: ../resources/dist/config/spooter_server.yaml
+          - src: ./resources/dist/config/spooter_server.yaml
             dst: /etc/spooter/server.yaml
             type: config
       
       scripts:
-          postinstall: ../resources/dist/scripts/postinstall_server.sh
-          preremove: ../resources/dist/scripts/preremove_server.sh
-          postremove: ../resources/dist/scripts/postremove_server.sh
+          postinstall: ./resources/dist/scripts/postinstall_server.sh
+          preremove: ./resources/dist/scripts/preremove_server.sh
+          postremove: ./resources/dist/scripts/postremove_server.sh
 
 snapshot:
     name_template: "{{ incpatch .Version }}-next"
