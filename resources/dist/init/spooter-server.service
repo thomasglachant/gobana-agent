@@ -1,7 +1,7 @@
-# spooter_agent.service
+# spooter-server.service
 
 [Unit]
-Description=Spooter Agent
+Description=Spooter Server
 Documentation=https://github.com/thomasglachant/spooter
 After=network.target
 
@@ -9,7 +9,7 @@ After=network.target
 Type=notify
 User=spooter
 Group=spooter
-ExecStart=/usr/bin/spooter-agent -config /etc/spooter/agent.yaml
+ExecStart=/usr/bin/spooter-server -config /etc/spooter/server.yaml
 TimeoutStopSec=5s
 LimitNOFILE=1048576
 LimitNPROC=512

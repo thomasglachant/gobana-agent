@@ -57,8 +57,8 @@ nfpms:
       
       bindir: /usr/bin
       contents:
-          - src: ./resources/dist/init/spooter_agent.service
-            dst: /lib/systemd/system/spooter_agent.service
+          - src: ./resources/dist/init/spooter-agent.service
+            dst: /lib/systemd/system/spooter-agent.service
           - src: ./resources/dist/config/spooter_agent.yaml
             dst: /etc/spooter/agent.yaml
             type: config
@@ -80,8 +80,8 @@ nfpms:
       
       bindir: /usr/bin
       contents:
-          - src: ./resources/dist/init/spooter_server.service
-            dst: /lib/systemd/system/spooter_server.service
+          - src: ./resources/dist/init/spooter-server.service
+            dst: /lib/systemd/system/spooter-server.service
           - src: ./resources/dist/config/spooter_server.yaml
             dst: /etc/spooter/server.yaml
             type: config
