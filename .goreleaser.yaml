@@ -2,8 +2,7 @@ before:
     hooks:
         - go mod tidy
 builds:
-    -   name: "spooter-agent"
-        binary: "spooter-agent"
+    -  binary: "spooter-agent"
         dig: agent
         env:
             - CGO_ENABLED=0
@@ -18,8 +17,7 @@ builds:
             - -trimpath
         ldflags:
             - -s -w    
-    -   name: "spooter-server"
-        binary: "spooter-server"
+    -   binary: "spooter-server"
         dir: server
         env:
             - CGO_ENABLED=0
