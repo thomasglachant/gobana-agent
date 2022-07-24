@@ -57,16 +57,16 @@ nfpms:
       
       bindir: /usr/bin
       contents:
-          - src: ./dist/init/spooter_agent.service
+          - src: dist/init/spooter_agent.service
             dst: /lib/systemd/system/spooter_agent.service
-          - src: ./dist/config/spooter_agent.yaml
+          - src: dist/config/spooter_agent.yaml
             dst: /etc/spooter/agent.yaml
             type: config
       
       scripts:
-          postinstall: ./dist/scripts/postinstall_agent.sh
-          preremove: ./dist/scripts/preremove_agent.sh
-          postremove: ./dist/scripts/postremove_agent.sh
+          postinstall: dist/scripts/postinstall_agent.sh
+          preremove: dist/scripts/preremove_agent.sh
+          postremove: dist/scripts/postremove_agent.sh
           
     - id: server
       package_name: spooter-server
