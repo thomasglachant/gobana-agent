@@ -98,7 +98,6 @@ release:
     github:
         owner: thomasglachant
         name: spooter
-    draft: true
     prerelease: auto
 
 changelog:

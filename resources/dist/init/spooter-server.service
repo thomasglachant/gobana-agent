@@ -6,7 +6,7 @@ Documentation=https://github.com/thomasglachant/spooter
 After=network.target
 
 [Service]
-Type=notify
+Type=simple
 User=spooter
 Group=spooter
 ExecStart=/usr/bin/spooter-server -config /etc/spooter/server.yaml
@@ -15,6 +15,11 @@ LimitNOFILE=1048576
 LimitNPROC=512
 PrivateTmp=true
 ProtectSystem=full
+Restart=on-failure
+RestartSec=5s
+
+StandardOutput=append:/var/log/spooter-server.log
+StandardError=append:/var/log/spooter-server.log
 
 [Install]
 WantedBy=multi-user.target
