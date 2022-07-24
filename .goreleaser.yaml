@@ -3,7 +3,7 @@ before:
         - go mod tidy
 builds:
     -   binary: "spooter-agent"
-        dig: agent
+        dir: agent
         env:
             - CGO_ENABLED=0
             - GO111MODULE=on
