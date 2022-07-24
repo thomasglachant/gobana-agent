@@ -18,8 +18,8 @@ ProtectSystem=full
 Restart=on-failure
 RestartSec=5s
 
-StandardOutput=append:/var/log/spooter-server.log
-StandardError=append:/var/log/spooter-server.log
+StandardOutput=append:/var/log/spooter/server.log
+StandardError=append:/var/log/spooter/server.log
 
 [Install]
 WantedBy=multi-user.target

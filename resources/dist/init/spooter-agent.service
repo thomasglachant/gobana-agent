@@ -18,8 +18,8 @@ ProtectSystem=full
 Restart=on-failure
 RestartSec=5s
 
-StandardOutput=append:/var/log/spooter-agent.log
-StandardError=append:/var/log/spooter-agent.log
+StandardOutput=append:/var/log/spooter/agent.log
+StandardError=append:/var/log/spooter/agent.log
 
 [Install]
 WantedBy=multi-user.target
