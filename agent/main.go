@@ -25,15 +25,11 @@ var assetFs embed.FS
 func main() {
 	var configFile string
 	flag.StringVar(&configFile, "config", "", "Path to config file")
-
-	// parse command line
 	flag.Parse()
 
 	// load config
-	core.Logger.Infof(logPrefix, "load config from %s", configFile)
-	agentConfig = &AgentConfig{}
-	if err := core.ReadConfig(configFile, agentConfig); err != nil {
-		core.Logger.Criticalf(logPrefix, "unable to load config : %s", err)
+	if err := loadConfig(configFile); err != nil {
+		core.Logger.Criticalf(logPrefix, "unable to load agent config : %s", err)
 	}
 
 	// setup embedded fs to core

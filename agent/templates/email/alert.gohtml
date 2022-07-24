@@ -1,39 +1,6 @@
 {{ template "email_layout" . }}
 
 {{ define "main" }}
-    <table>
-        <tr>
-            <td style="width:34%; text-align: left;">
-                {{ if .Metadata.Application }}
-                    <div class="label">
-                        APPLICATION
-                    </div>
-                    <div class="value">
-                        {{ .Metadata.Application }}
-                    </div>
-                {{ end }}
-            </td>
-            <td style="width:33%; text-align: center;">
-                {{ if .Metadata.Server }}
-                    <div class="label">
-                        SERVER
-                    </div>
-                    <div class="value">
-                        {{ .Metadata.Server }}
-                    </div>
-                {{ end }}
-            </td>
-            <td style="width:33%; text-align: right;">
-                <div class="label">
-                    OCCURRENCES
-                </div>
-                <div class="value">
-                    {{ len .Alerts }}
-                </div>
-            </td>
-        </tr>
-    </table>
-
     {{ range $i, $alert := .Alerts }}
         {{ if $i }}
             <br />
@@ -50,6 +17,30 @@
         ">
             Alert #{{ $i }}
         </div>
+        <table>
+            <tr>
+                <td style="width:34%; text-align: left;">
+                    {{ if $alert.Application }}
+                        <div class="label">
+                            APPLICATION
+                        </div>
+                        <div class="value">
+                            {{ $alert.Application }}
+                        </div>
+                    {{ end }}
+                </td>
+                <td style="width:33%; text-align: center;">
+                    {{ if $alert.Server }}
+                        <div class="label">
+                            SERVER
+                        </div>
+                        <div class="value">
+                            {{ $alert.Server }}
+                        </div>
+                    {{ end }}
+                </td>
+            </tr>
+        </table>
 
         <div style="margin-bottom: 15px;">
             <table style="margin-bottom: 10px">

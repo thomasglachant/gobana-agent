@@ -6,15 +6,19 @@ import (
 	"github.com/thomasglachant/spooter/core"
 )
 
-var agentConfig *AgentConfig
+var agentConfig = &AgentConfig{}
 
-type MetadataConfig struct {
-	Application string `yaml:"application" validate:"required,alphanum"`
-	Server      string `yaml:"server"`
+func loadConfig(configFile string) error {
+	core.Logger.Infof(logPrefix, "load config from %s", configFile)
+	agentConfig = &AgentConfig{}
+	if err := core.ReadConfig(configFile, agentConfig); err != nil {
+		return err
+	}
+	return nil
 }
 
 type ParserConfig struct {
-	Name          string            `yaml:"name" validate:"required,alphanum"`
+	Name          string            `yaml:"name" validate:"required,regular_name"`
 	Mode          string            `yaml:"mode" validate:"required,oneof=json regex"`
 	RegexPattern  string            `yaml:"regex_pattern" validate:"required_if=Mode regex"`
 	RegexFields   []string          `yaml:"regex_fields" validate:"required_if=Mode regex,dive,required"`
@@ -35,7 +39,7 @@ type TriggerValueConfig struct {
 }
 
 type TriggerConfig struct {
-	Name   string               `yaml:"name" validate:"required"`
+	Name   string               `yaml:"name" validate:"required,regular_name"`
 	Values []TriggerValueConfig `yaml:"values" validate:"required_if=Type values,dive,required"`
 }
 
@@ -45,11 +49,12 @@ type AlertConfig struct {
 }
 
 type AgentConfig struct {
-	Debug    bool            `yaml:"debug"`
-	Metadata MetadataConfig  `yaml:"metadata" validate:"required"`
-	Parsers  []*ParserConfig `yaml:"parsers" validate:"required,gte=1,unique=Name,dive"`
-	Alerts   AlertConfig     `yaml:"alerts" validate:""`
-	SMTP     core.SMTPConfig `yaml:"smtp"`
+	Debug       bool            `yaml:"debug"`
+	Application string          `yaml:"application" validate:"required,regular_name"`
+	Server      string          `yaml:"server"`
+	Parsers     []*ParserConfig `yaml:"parsers" validate:"required,gte=1,unique=Name,dive"`
+	Alerts      AlertConfig     `yaml:"alerts" validate:""`
+	SMTP        core.SMTPConfig `yaml:"smtp"`
 }
 
 func (s *AgentConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {

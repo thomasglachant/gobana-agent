@@ -1,11 +1,10 @@
-##  *New alert on {{ .Metadata.Application }}*  ##
-Application: {{ .Metadata.Application }}     Server: {{ .Metadata.Server }}    Occurrences: {{ len .Alerts }}
-
 {{ range $i, $alert := .Alerts }}
 {{if $i}}
 
 {{end}}
 ----- Alert #{{ $i }} -----
+Application: {{ .Application }}
+Server: {{ .Server }}
 Date: {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
 File: `{{ $alert.Filename }}`
 Parser: `{{ $alert.ParserName }}`

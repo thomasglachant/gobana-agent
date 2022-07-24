@@ -34,7 +34,7 @@ type Alert struct {
 type Alerts []*Alert
 
 func (alerts Alerts) Subject() string {
-	return fmt.Sprintf("New alert on %s", agentConfig.Metadata.Application)
+	return fmt.Sprintf("%d alert(s) on %s", len(alerts), agentConfig.Application)
 }
 
 func (alerts Alerts) TemplateName() string {
@@ -43,8 +43,7 @@ func (alerts Alerts) TemplateName() string {
 
 func (alerts Alerts) Data() map[string]interface{} {
 	return map[string]interface{}{
-		"Metadata": agentConfig.Metadata,
-		"Alerts":   alerts,
+		"Alerts": alerts,
 	}
 }
 

@@ -4,6 +4,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -43,6 +44,8 @@ func ReadConfig(filename string, config interface{}) error {
 func CheckConfig(config interface{}) error {
 	// apply validator
 	validate := validator.New()
+	_ = validate.RegisterValidation("regular_name", ValidateRegularName)
+
 	err := validate.Struct(config)
 	if err != nil {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
@@ -74,6 +77,8 @@ func CheckConfig(config interface{}) error {
 				return fmt.Errorf("\"%s\" entries must be unique", field)
 			case err.Tag() == "required_if":
 				return fmt.Errorf("\"%s\" is required when %s is \"%s\"", field, strings.Split(err.Param(), " ")[0], strings.Split(err.Param(), " ")[1])
+			case err.Tag() == "regular_name":
+				return fmt.Errorf("\"%s\" must contains only letters, numbers, space, \"-\" or \"_\"", field)
 			default:
 				return fmt.Errorf("\"%s\" fails to validate constraint \"%s\"", field, err.Tag())
 			}
@@ -81,4 +86,9 @@ func CheckConfig(config interface{}) error {
 	}
 
 	return nil
+}
+
+func ValidateRegularName(fl validator.FieldLevel) bool {
+	reg := regexp.MustCompile(`^[a-zA-Z0-9_\-]+$`)
+	return reg.MatchString(fl.Field().String())
 }

@@ -5,9 +5,8 @@ debug: false
 
 #
 # Metadata about the agent 
-metadata: # (required)
-    application: "MyApp"  # Name of your application (required)
-    server: "localhost"   # Name of your server (optional)
+application: "MyApp"  # Name of your application (required)
+server: "localhost"   # Name of your server (optional)
 
 #
 # Parsers are used to read and normalize logs 

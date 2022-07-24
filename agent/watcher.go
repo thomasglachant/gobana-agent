@@ -191,8 +191,8 @@ type LogLine struct {
 func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*LogLine, error) {
 	log := &LogLine{
 		Metadata: LogMetadata{
-			Application: agentConfig.Metadata.Application,
-			Server:      agentConfig.Metadata.Server,
+			Application: agentConfig.Application,
+			Server:      agentConfig.Server,
 			Filename:    fileWatcher.fileName,
 			Parser:      fileWatcher.parser.Name,
 			CaptureDate: time.Now(),

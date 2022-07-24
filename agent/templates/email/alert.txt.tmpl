@@ -1,13 +1,13 @@
 {{ template "email_layout" . }}
 
 {{ define "main" }}
-Application: {{ .Metadata.Application }}     Server: {{ .Metadata.Server }}    Occurrences: {{ len .Alerts }}
-
 {{ range $i, $alert := .Alerts }}
 {{if $i}}
 
 {{end}}
 ----- Alert #{{ $i }} -----
+Application: {{ $alert.Application }}
+Server: {{ $alert.Server }}
 Date: {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
 File: {{ $alert.Filename }}
 Parser: {{ $alert.ParserName }}
