@@ -94,6 +94,13 @@ nfpms:
 snapshot:
     name_template: "{{ incpatch .Version }}-next"
 
+release:
+    github:
+        owner: thomasglachant
+        name: spooter
+    draft: true
+    prerelease: auto
+
 changelog:
     sort: asc
     filters:
