@@ -1,10 +1,10 @@
-package agent
+package main
 
 import (
 	"fmt"
 	"os"
 
-	"spooter/core"
+	"github.com/thomasglachant/spooter/core"
 )
 
 const (
@@ -20,7 +20,7 @@ type Notification interface {
 }
 
 func SendNotification(notification Notification) error {
-	for _, recipient := range core.AppConfig.Agent.Alerts.Recipients {
+	for _, recipient := range agentConfig.Alerts.Recipients {
 		if recipient.Type == SubscriptionTypeEmail {
 			if err := sendEmail(recipient.Recipient, notification); err != nil {
 				return fmt.Errorf("error sending email: %s", err.Error())
@@ -38,7 +38,7 @@ func sendEmail(email string, notification Notification) error {
 	core.Logger.Infof(notifierLogPrefix, "Send an email")
 
 	err := core.SendEmail(
-		&core.AppConfig.Common.SMTP,
+		&agentConfig.SMTP,
 		email,
 		notification.Subject(),
 		notification.TemplateName(),

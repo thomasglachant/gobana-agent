@@ -3,13 +3,13 @@ package core
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
-	"github.com/creasty/defaults"
+	"gopkg.in/yaml.v3"
+
 	"github.com/go-playground/validator/v10"
 )
-
-var AppConfig *ConfigStruct
 
 type SMTPConfig struct {
 	Host       string `yaml:"host" validate:"required"`
@@ -21,68 +21,26 @@ type SMTPConfig struct {
 	FromEmail  string `yaml:"from_email" validate:"required,email"`
 }
 
-type MetadataConfig struct {
-	Application string `yaml:"application" validate:"required,alphanum"`
-	Server      string `yaml:"server"`
-}
-
-type ParserConfig struct {
-	Name          string            `yaml:"name" validate:"required,alphanum"`
-	Mode          string            `yaml:"mode" validate:"required,oneof=json regex"`
-	RegexPattern  string            `yaml:"regex_pattern" validate:"required_if=Mode regex"`
-	RegexFields   []string          `yaml:"regex_fields" validate:"required_if=Mode regex,dive,required"`
-	JSONFields    map[string]string `yaml:"json_fields" validate:"required_if=Mode json,dive,required"`
-	FilesIncluded []string          `yaml:"files_included" validate:"required,gte=1,dive,required"`
-	FilesExcluded []string          `yaml:"files_excluded" validate:"dive,file,required"`
-}
-
-type RecipientConfig struct {
-	Type      string `yaml:"type" validate:"required,oneof=email slack_webhook"`
-	Recipient string `yaml:"recipient" validate:"required"`
-}
-
-type TriggerValueConfig struct {
-	Field    string `yaml:"field" validate:"required"`
-	Operator string `yaml:"operator" validate:"required,oneof=regex is is_not contains not_contains start_with not_start_with match_regex"`
-	Value    string `yaml:"value" validate:"required"`
-}
-
-type TriggerConfig struct {
-	Name   string               `yaml:"name" validate:"required"`
-	Values []TriggerValueConfig `yaml:"values" validate:"required_if=Type values,dive,required"`
-}
-
-type AlertConfig struct {
-	Recipients []RecipientConfig `yaml:"recipients" validate:"required,gt=0,dive"`
-	Triggers   []TriggerConfig   `yaml:"triggers" validate:"dive"`
-}
-
-type AgentConfig struct {
-	Metadata MetadataConfig  `yaml:"metadata" validate:"required"`
-	Parsers  []*ParserConfig `yaml:"parsers" validate:"required,gte=1,unique=Name,dive"`
-	Alerts   AlertConfig     `yaml:"alerts" validate:""`
-}
-
-type CommonConfig struct {
-	SMTP SMTPConfig `yaml:"smtp"`
-}
-
-type ConfigStruct struct {
-	Agent  AgentConfig  `yaml:"agent" validate:"required"`
-	Common CommonConfig `yaml:"common" validate:"required"`
-}
-
-func (s *ConfigStruct) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	_ = defaults.Set(s)
-	type plain ConfigStruct
-	if err := unmarshal((*plain)(s)); err != nil {
-		return err
+func ReadConfig(filename string, config interface{}) error {
+	var readErr error
+	data, readErr := os.ReadFile(filename)
+	if readErr != nil {
+		return fmt.Errorf("unable to open config file : %s", readErr)
 	}
+	if err := yaml.Unmarshal(data, config); err != nil {
+		return fmt.Errorf("unable to decode config : %s", err)
+	}
+
+	validationErr := CheckConfig(config)
+	if validationErr != nil {
+		return fmt.Errorf("invalid config file : %s", validationErr)
+	}
+
 	return nil
 }
 
 //nolint:gocyclo
-func CheckConfig(config *ConfigStruct) error {
+func CheckConfig(config interface{}) error {
 	// apply validator
 	validate := validator.New()
 	err := validate.Struct(config)

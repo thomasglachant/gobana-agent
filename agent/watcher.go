@@ -1,4 +1,4 @@
-package agent
+package main
 
 import (
 	"crypto/sha256"
@@ -14,7 +14,7 @@ import (
 
 	"github.com/hpcloud/tail"
 
-	"spooter/core"
+	"github.com/thomasglachant/spooter/core"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 )
 
 type currentWatching struct {
-	parser   *core.ParserConfig
+	parser   *ParserConfig
 	fileName string
 	tail     *tail.Tail
 }
@@ -72,7 +72,7 @@ func (watcher *Watcher) cleanUpVanishedFiles() {
 }
 
 func (watcher *Watcher) discoverFilesToWatch() error {
-	for _, parser := range core.AppConfig.Agent.Parsers {
+	for _, parser := range agentConfig.Parsers {
 		includedFiles, err := core.GetFilesMatchingPatterns(parser.FilesIncluded)
 		if err != nil {
 			return fmt.Errorf("error while retrieve included files %s: %s", parser.FilesIncluded, err)
@@ -99,11 +99,11 @@ func (watcher *Watcher) discoverFilesToWatch() error {
 	return nil
 }
 
-func (watcher *Watcher) genTailKey(parser *core.ParserConfig, file string) string {
+func (watcher *Watcher) genTailKey(parser *ParserConfig, file string) string {
 	return fmt.Sprintf("%s-%s", sha256.New().Sum([]byte(parser.Name)), file)
 }
 
-func (watcher *Watcher) startWatchFile(parser *core.ParserConfig, file string) {
+func (watcher *Watcher) startWatchFile(parser *ParserConfig, file string) {
 	core.Logger.Infof(watcherLogPrefix, "Start watching file %s", file)
 
 	t, err := tail.TailFile(
@@ -191,8 +191,8 @@ type LogLine struct {
 func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*LogLine, error) {
 	log := &LogLine{
 		Metadata: LogMetadata{
-			Application: core.AppConfig.Agent.Metadata.Application,
-			Server:      core.AppConfig.Agent.Metadata.Server,
+			Application: agentConfig.Metadata.Application,
+			Server:      agentConfig.Metadata.Server,
 			Filename:    fileWatcher.fileName,
 			Parser:      fileWatcher.parser.Name,
 			CaptureDate: time.Now(),

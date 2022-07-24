@@ -1,0 +1,20 @@
+# spooter_agent.service
+
+[Unit]
+Description=Spooter Agent
+Documentation=https://github.com/thomasglachant/spooter
+After=network.target
+
+[Service]
+Type=notify
+User=spooter
+Group=spooter
+ExecStart=/usr/bin/spooter-agent -config /etc/spooter/agent.yaml
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

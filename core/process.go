@@ -1,7 +1,10 @@
 package core
 
 import (
+	"os"
+	"os/signal"
 	"reflect"
+	"syscall"
 	"time"
 )
 
@@ -75,4 +78,50 @@ func ProcessInfiniteLoop(delay time.Duration, exitChan chan bool, handler func()
 		// run
 		handler()
 	}
+}
+
+func RunProcesses(processes []ProcessInterface) {
+	nbCtrlC := 0
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+	signal.Notify(sigChan, syscall.SIGTERM)
+
+	// Catch ctrl+c signal
+	go func(processes []ProcessInterface) {
+		for range sigChan {
+			nbCtrlC++
+
+			if nbCtrlC >= 2 {
+				Logger.Infof(logPrefix, "Force exit !")
+				os.Exit(0)
+			}
+			Logger.Infof(logPrefix, "Receive stop signal : kill process properly ... press Ctrl+c again to force kill")
+
+			// Shutdown all running processes
+			for _, process := range processes {
+				process.Stop()
+			}
+		}
+	}(processes)
+
+	// Start services
+	c := make(chan bool)
+	for _, process := range processes {
+		go func(process ProcessInterface) {
+			defer func() {
+				if r := recover(); r != nil {
+					Logger.Criticalf(process.GetName(), "Panic occurred : %v", r)
+				}
+			}()
+			process.Start()
+			c <- true
+		}(process)
+	}
+
+	// Wait for all processes exited
+	for i := 0; i < len(processes); i++ {
+		<-c
+	}
+
+	Logger.Infof(logPrefix, "All processes exited")
 }

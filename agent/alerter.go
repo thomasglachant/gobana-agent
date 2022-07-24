@@ -1,4 +1,4 @@
-package agent
+package main
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"spooter/core"
+	"github.com/thomasglachant/spooter/core"
 )
 
 const (
@@ -34,7 +34,7 @@ type Alert struct {
 type Alerts []*Alert
 
 func (alerts Alerts) Subject() string {
-	return fmt.Sprintf("New alert on %s", core.AppConfig.Agent.Metadata.Application)
+	return fmt.Sprintf("New alert on %s", agentConfig.Metadata.Application)
 }
 
 func (alerts Alerts) TemplateName() string {
@@ -43,7 +43,7 @@ func (alerts Alerts) TemplateName() string {
 
 func (alerts Alerts) Data() map[string]interface{} {
 	return map[string]interface{}{
-		"Metadata": core.AppConfig.Agent.Metadata,
+		"Metadata": agentConfig.Metadata,
 		"Alerts":   alerts,
 	}
 }
@@ -103,8 +103,8 @@ func (alerter *Alerter) flush() {
 func HandleParserTrigger(data core.EventData) {
 	line := data["logLine"].(*LogLine)
 
-	for _, trigger := range core.AppConfig.Agent.Alerts.Triggers {
-		go func(trigger core.TriggerConfig) {
+	for _, trigger := range agentConfig.Alerts.Triggers {
+		go func(trigger TriggerConfig) {
 			allFieldsMatch := true
 			for _, triggerValue := range trigger.Values {
 				fieldValue := ""
