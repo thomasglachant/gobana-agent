@@ -89,6 +89,6 @@ func CheckConfig(config interface{}) error {
 }
 
 func ValidateRegularName(fl validator.FieldLevel) bool {
-	reg := regexp.MustCompile(`^[a-zA-Z0-9_\-]+$`)
+	reg := regexp.MustCompile(`^[a-zA-Z0-9_ \-]+$`)
 	return reg.MatchString(fl.Field().String())
 }
