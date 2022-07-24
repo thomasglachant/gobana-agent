@@ -2,7 +2,7 @@ before:
     hooks:
         - go mod tidy
 builds:
-    -  binary: "spooter-agent"
+    -   binary: "spooter-agent"
         dig: agent
         env:
             - CGO_ENABLED=0
