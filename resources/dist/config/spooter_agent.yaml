@@ -16,11 +16,12 @@ server: "localhost"   # Name of your server (optional)
 # - `regex` : parse a log line using a regex to capture fields value.
 # - `json` : parse a log line using a json format to capture and map fields value.
 parsers: #(required)
+
 #    # Json parser example
 #    -   name: "example_json" # ID of the parser, used for alerting and storage (required, must be unique)
 #        mode: "json" # enable json mode (required for json parser)
-#        # You must specify in "json_fields" the fields you want to capture (required for json parser)
-#        json_fields: # mapping between localField to (required for json parser)
+#        # You must specify the fields you want to capture (required)
+#        fields: # mapping between localField to (required)
 #            myLocalField: "my_field_in_json"
 #            date: "datetime"
 #            level: "level_name"
@@ -36,16 +37,11 @@ parsers: #(required)
 #        # can contains "*" to match pattern or "**" to match all files.
 #        files_excluded:
 #            - "/var/log/symfony/prod.deprecations.log"
-#
+
 #    # Regex parser example
 #    -   name: "example_regex" # ID of the parser, used for alerting and storage (required, must be unique)
 #        mode: "regex"  # enable regex mode (required for regex parser)
-#        regex_pattern: "\\[(.+)\\] [a-zA-Z0-9_\\-]+.([a-zA-Z0-9]+): (.*)"  # regex pattern (required for regex parser)
-#        # List of fields to capture in pattern (required for regex parser)
-#        regex_fields:
-#            - "date"
-#            - "level"
-#            - "message"
+#        regex_pattern: "\\[(?P<date>.+)\\] [a-zA-Z0-9_\\-]+.(?P<level>[a-zA-Z0-9]+): (?P<message>.*)"  # regex pattern with group name which identify fields to capture (required for regex parser)
 #        # File list to include (required)
 #        # can contains "*" to match pattern or "**" to match all files.  
 #        files_included:
@@ -59,8 +55,10 @@ parsers: #(required)
 #
 # Alerts are used to send notifications to users.
 alerts: # (optional)
+    frequency: 5 # Frequency of alerting (in minutes)
+    
     # Triggers define conditions that must be met to send an alert.
-#    triggers:
+    triggers:
 #        -   name: "critical detected" # ID of the trigger, displayed in notification (required)
 #            # List of conditions that must be VALID to trigger (required)
 #            # "field" must contain the name of a field captured by the parser or a special field from the following list :
@@ -83,14 +81,15 @@ alerts: # (optional)
 #                - { field: "level", operator: "start_with", value: "CRIT" }
 #                - { field: "level", operator: "not_start_with", value: "WARN" }
 #                - { field: "message", operator: "match_regex", value: ".*Error.*" }
+
 #    # List of recipients to send notifications to
-#    # "type" must contain one of the following types :
+#    # "kind" must contain one of the following types :
 #    # - "email" : send notification using smtp to an email address
 #    # - "slack_webhooks" : send slack message using a webhook
-#    recipients: # (required)
-#        -   type: "email" # (required)
+    recipients: # (required)
+#        -   kind: "email" # (required)
 #            recipient: "user@localhost.local"
-#        -   type: "slack_webhook" # (required)
+#        -   kind: "slack_webhook" # (required)
 #            recipient: "https://hooks.slack.com/services/XXXX/XXXXX/XXXXX"
 
 # SMTP configuration (optional but required for email notification)
@@ -100,5 +99,5 @@ smtp:
     username: ""
     password: ""
     ssl_enabled: false # Is TLS enable (optional)
-    from_email: "noreply@localhost.local" # Email of the email sender (required)
-    from_name: "Spooter Bot" # Name of the email sender (required)
+    from_email: "spooter@localhost" # Email of the email sender (required)
+    from_name: "Spooter" # Name of the email sender (required)

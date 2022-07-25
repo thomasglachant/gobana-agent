@@ -2,15 +2,26 @@
 {{if $i}}
 
 {{end}}
------ Alert #{{ $i }} -----
-Application: {{ .Application }}
-Server: {{ .Server }}
-Date: {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
-File: `{{ $alert.Filename }}`
-Parser: `{{ $alert.ParserName }}`
-Trigger: `{{ $alert.TriggerName }}`
+#
+# New alert
+#
 
+*METADATA*
+    • *Application*: `{{ $alert.Application }}`
+    • *Server*: `{{ $alert.Server }}`
+    • *Date*: `{{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}`
+    • *File*: `{{ $alert.Filename }}`
+    • *Parser*: `{{ $alert.ParserName }}`
+    • *Trigger*: `{{ $alert.TriggerName }}`
+
+
+*EXTRACTED FIELDS*
+{{ range $fieldName, $fieldValue := $alert.Fields }}
+    • *{{ $fieldName }}*: `{{ $fieldValue }}`{{ end }}
+
+
+*RAW CONTENT*
 ```
-{{ $alert.Content }}
+    {{ $alert.Raw }}
 ```
 {{ end }}

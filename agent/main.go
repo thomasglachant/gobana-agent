@@ -12,6 +12,7 @@ import (
 var (
 	logPrefix = "agent"
 
+	config  *AgentConfig
 	alerter *Alerter
 	watcher *Watcher
 )
@@ -24,7 +25,13 @@ var templateFs embed.FS
 //go:embed assets/**/*
 var assetFs embed.FS
 
+// auto-generated during build
+var version string
+var date string
+
 func main() {
+	fmt.Printf("# spooter-agent v%s (%s)\n", version, date)
+
 	var configFile string
 	var checkConfig bool
 	flag.StringVar(&configFile, "config", "", "Path to config file")
@@ -34,7 +41,8 @@ func main() {
 	//
 	// check config special case
 	if checkConfig {
-		if err := loadConfig(configFile); err != nil {
+		config = &AgentConfig{}
+		if err := core.ReadConfig(configFile, config); err != nil {
 			fmt.Printf("Invalid config file : %s\n", err)
 			os.Exit(1)
 		}
@@ -45,14 +53,15 @@ func main() {
 	//
 	// start agent
 	core.Logger.Infof(logPrefix, "load config from %s", configFile)
-	if err := loadConfig(configFile); err != nil {
+	config = &AgentConfig{}
+	if err := core.ReadConfig(configFile, config); err != nil {
 		core.Logger.Criticalf(logPrefix, "unable to load agent config : %s", err)
 	}
 
 	// setup embedded fs to core
 	core.TemplateFs = templateFs
 	core.AssetFs = assetFs
-	core.Logger.DebugEnabled = agentConfig.Debug
+	core.Logger.DebugEnabled = config.Debug
 
 	// start processes
 	alerter = &Alerter{}

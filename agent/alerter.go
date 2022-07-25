@@ -12,15 +12,14 @@ import (
 
 const (
 	alerterLogPrefix = "alerter"
-	alerterTimer     = 10 * time.Second
 
-	TriggerTypeRegex        = "match_regex"
-	TriggerTypeEqual        = "is"
-	TriggerTypeNotEqual     = "is_not"
-	TriggerTypeContains     = "contains"
-	TriggerTypeNotContains  = "not_contains"
-	TriggerTypeStartWith    = "start_with"
-	TriggerTypeNotStartWith = "not_start_with"
+	triggerTypeRegex        = "match_regex"
+	triggerTypeEqual        = "is"
+	triggerTypeNotEqual     = "is_not"
+	triggerTypeContains     = "contains"
+	triggerTypeNotContains  = "not_contains"
+	triggerTypeStartWith    = "start_with"
+	triggerTypeNotStartWith = "not_start_with"
 )
 
 type Alert struct {
@@ -30,13 +29,14 @@ type Alert struct {
 	Filename    string
 	ParserName  string
 	TriggerName string
-	Content     string
+	Fields      map[string]string
+	Raw         string
 }
 
 type Alerts []*Alert
 
 func (alerts Alerts) Subject() string {
-	return fmt.Sprintf("%d alert(s) on %s", len(alerts), agentConfig.Application)
+	return fmt.Sprintf("%d new alert(s)", len(alerts))
 }
 
 func (alerts Alerts) TemplateName() string {
@@ -65,8 +65,9 @@ func (alerter *Alerter) Run() error {
 	})
 	defer core.EventDispatcher.Unsubscribe(subscriptionID)
 
-	core.ProcessInfiniteLoop(alerterTimer, alerter.exitChan, func() {
-		// flush pending alerts
+	core.ProcessInfiniteLoop(time.Duration(config.Alerts.Frequency)*time.Second, alerter.exitChan, func() {
+		core.Logger.Debugf(alerterLogPrefix, "Flush pending Alerts")
+		// flush pending Alerts
 		alerter.flush()
 	})
 
@@ -90,7 +91,7 @@ func (alerter *Alerter) flush() {
 		return
 	}
 
-	core.Logger.Debugf(alerterLogPrefix, "Flush pending alerts")
+	core.Logger.Debugf(alerterLogPrefix, "Flush pending Alerts")
 
 	alerter.mu.Lock()
 	err := SendNotification(&alerter.pendingAlerts)
@@ -104,8 +105,8 @@ func (alerter *Alerter) flush() {
 func HandleParserTrigger(data core.EventData) {
 	line := data["logLine"].(*LogLine)
 
-	for _, trigger := range agentConfig.Alerts.Triggers {
-		go func(trigger TriggerConfig) {
+	for _, trigger := range config.Alerts.Triggers {
+		go func(trigger TriggerConfigStruct) {
 			allFieldsMatch := true
 			for _, triggerValue := range trigger.Values {
 				fieldValue := ""
@@ -137,12 +138,13 @@ func HandleParserTrigger(data core.EventData) {
 				core.Logger.Infof(alerterLogPrefix, "Line match with trigger \"%s\"", trigger.Name)
 				alerter.addAlert(&Alert{
 					Date:        time.Now(),
-					Application: agentConfig.Application,
-					Server:      agentConfig.Server,
+					Application: config.Application,
+					Server:      config.Server,
 					Filename:    line.Metadata.Filename,
 					ParserName:  line.Metadata.Parser,
 					TriggerName: trigger.Name,
-					Content:     line.Raw,
+					Fields:      line.Fields,
+					Raw:         line.Raw,
 				})
 			}
 		}(trigger)
@@ -154,32 +156,32 @@ func checkTriggerValueMatch(fieldValue, operator, operatorValue string) (bool, e
 	lowerOperatorValue := strings.ToLower(operatorValue)
 
 	switch operator {
-	case TriggerTypeRegex:
+	case triggerTypeRegex:
 		r := regexp.MustCompile(operatorValue)
 		if r.MatchString(fieldValue) {
 			return true, nil
 		}
-	case TriggerTypeEqual:
+	case triggerTypeEqual:
 		if lowerFieldValue == lowerOperatorValue {
 			return true, nil
 		}
-	case TriggerTypeNotEqual:
+	case triggerTypeNotEqual:
 		if lowerFieldValue != lowerOperatorValue {
 			return true, nil
 		}
-	case TriggerTypeContains:
+	case triggerTypeContains:
 		if strings.Contains(lowerFieldValue, lowerOperatorValue) {
 			return true, nil
 		}
-	case TriggerTypeNotContains:
+	case triggerTypeNotContains:
 		if !strings.Contains(lowerFieldValue, lowerOperatorValue) {
 			return true, nil
 		}
-	case TriggerTypeStartWith:
+	case triggerTypeStartWith:
 		if lowerFieldValue[0:len(operatorValue)] == lowerOperatorValue {
 			return true, nil
 		}
-	case TriggerTypeNotStartWith:
+	case triggerTypeNotStartWith:
 		if lowerFieldValue[0:len(operatorValue)] != lowerOperatorValue {
 			return true, nil
 		}

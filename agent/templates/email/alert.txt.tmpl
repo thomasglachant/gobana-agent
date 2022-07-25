@@ -6,13 +6,22 @@
 
 {{end}}
 ----- Alert #{{ $i }} -----
-Application: {{ $alert.Application }}
-Server: {{ $alert.Server }}
-Date: {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
-File: {{ $alert.Filename }}
-Parser: {{ $alert.ParserName }}
-Trigger: {{ $alert.TriggerName }}
+METADATA
+    Application: {{ $alert.Application }}
+    Server: {{ $alert.Server }}
+    Date: {{ $alert.Date.Format "2006-01-02T15:04:05Z07:00" }}
+    File: {{ $alert.Filename }}
+    Parser: {{ $alert.ParserName }}
+    Trigger: {{ $alert.TriggerName }}
 
-{{ $alert.Content }}
+
+EXTRACTED FIELDS
+{{ range $fieldName, $fieldValue := $alert.Fields }}
+    {{ $fieldName }}: {{ $fieldValue }}
+{{ end }}
+
+
+RAW CONTENT
+    {{ $alert.Raw }}
 {{ end }}
 {{ end }}

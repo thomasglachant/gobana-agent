@@ -32,6 +32,12 @@ for i in $(seq 1 "${NUMBER}"); do
 		echo '{"message":"msg","level":400,"context":{"filename": "toto.php"}, "level_name":"'"${LEVEL}"'","channel":"request","datetime":"'${CUR_DATE}'","extra":{"app_user": "be78bf26-3714-43da-aa92-bd4a7be29d22"}}'>> "${FILENAME}"
 	elif test "${TYPE}" = "symfony"; then
 		echo "[${CUR_DATE}] request.${LEVEL}: My message []" >> "${FILENAME}"
+	elif test "${TYPE}" = "nginx"; then
+		if test "${LEVEL}" = "CRITICAL"; then
+		echo '126.76.96.124 - XXXX@localhost.local [25/Jul/2022:10:49:48 +0200] "GET /status HTTP/1.1" 500 44 "https://api.localhost.local/status" "Mozilla/5.0+(compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)" "126.76.96.124"' >> "${FILENAME}"
+		else
+		echo '126.76.96.124 - XXXX@localhost.local [25/Jul/2022:10:49:48 +0200] "GET /status HTTP/1.1" 200 44 "https://api.localhost.local/status" "Mozilla/5.0+(compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)" "126.76.96.124"' >> "${FILENAME}"
+		fi
 	else
 		echo "Error: invalid type \"${TYPE}\""
 		exit 1

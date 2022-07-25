@@ -23,12 +23,12 @@ const (
 
 	eventNameLogDiscover = "agent.log.discover"
 
-	ParserModeRegex = "regex"
-	ParserModeJSON  = "json"
+	parserModeRegex = "regex"
+	parserModeJSON  = "json"
 )
 
 type currentWatching struct {
-	parser   *ParserConfig
+	parser   *ParserConfigStruct
 	fileName string
 	tail     *tail.Tail
 }
@@ -42,6 +42,7 @@ type Watcher struct {
 }
 
 func (watcher *Watcher) Run() error {
+	watcher.regexCache = make(map[string]*regexp.Regexp)
 	watcher.currentTails = map[string]*currentWatching{}
 	watcher.exitChan = make(chan bool)
 
@@ -72,7 +73,7 @@ func (watcher *Watcher) cleanUpVanishedFiles() {
 }
 
 func (watcher *Watcher) discoverFilesToWatch() error {
-	for _, parser := range agentConfig.Parsers {
+	for _, parser := range config.Parsers {
 		includedFiles, err := core.GetFilesMatchingPatterns(parser.FilesIncluded)
 		if err != nil {
 			return fmt.Errorf("error while retrieve included files %s: %s", parser.FilesIncluded, err)
@@ -99,11 +100,11 @@ func (watcher *Watcher) discoverFilesToWatch() error {
 	return nil
 }
 
-func (watcher *Watcher) genTailKey(parser *ParserConfig, file string) string {
+func (watcher *Watcher) genTailKey(parser *ParserConfigStruct, file string) string {
 	return fmt.Sprintf("%s-%s", sha256.New().Sum([]byte(parser.Name)), file)
 }
 
-func (watcher *Watcher) startWatchFile(parser *ParserConfig, file string) {
+func (watcher *Watcher) startWatchFile(parser *ParserConfigStruct, file string) {
 	core.Logger.Infof(watcherLogPrefix, "Start watching file %s", file)
 
 	t, err := tail.TailFile(
@@ -191,8 +192,8 @@ type LogLine struct {
 func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*LogLine, error) {
 	log := &LogLine{
 		Metadata: LogMetadata{
-			Application: agentConfig.Application,
-			Server:      agentConfig.Server,
+			Application: config.Application,
+			Server:      config.Server,
 			Filename:    fileWatcher.fileName,
 			Parser:      fileWatcher.parser.Name,
 			CaptureDate: time.Now(),
@@ -203,7 +204,7 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 	}
 
 	switch {
-	case fileWatcher.parser.Mode == ParserModeRegex:
+	case fileWatcher.parser.Mode == parserModeRegex:
 		var regex *regexp.Regexp
 		var ok bool
 		if regex, ok = watcher.regexCache[fileWatcher.parser.Name]; !ok {
@@ -213,14 +214,12 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 			watcher.mu.Unlock()
 		}
 		matches := regex.FindStringSubmatch(line)
-		if len(matches) > 0 {
-			i := 1
-			for _, name := range fileWatcher.parser.RegexFields {
+		for i, name := range regex.SubexpNames() {
+			if i != 0 && name != "" {
 				log.Fields[name] = matches[i]
-				i += 1
 			}
 		}
-	case fileWatcher.parser.Mode == ParserModeJSON:
+	case fileWatcher.parser.Mode == parserModeJSON:
 		jsonData := map[string]interface{}{}
 		if err := json.Unmarshal([]byte(line), &jsonData); err != nil {
 			return nil, fmt.Errorf("unable to parse line as json: %s", err)

@@ -2,9 +2,8 @@
 
 Spooter is a simple, fast, and powerful log monitoring tool.
 
-You can use agent only to monitor log files and configure alerting, 
+You can use agent only to monitor log files and configure alerting,
 or you can use agent + server to centralize log monitoring.
-
 
 ## Agent mode
 
@@ -39,7 +38,7 @@ parsers: #(required)
             level: "level_name"
             message: "message"
             user: "extra.user" # separate fields by "." to capture inner fields
-        
+
         # File list to include (required)
         # can contains "*" to match pattern or "**" to match all files.  
         files_included:
@@ -53,12 +52,7 @@ parsers: #(required)
     # Regex parser example
     -   name: "example_regex" # ID of the parser, used for alerting and storage (required, must be unique)
         mode: "regex"  # enable regex mode (required for regex parser)
-        regex_pattern: "\\[(.+)\\] [a-zA-Z0-9_\\-]+.([a-zA-Z0-9]+): (.*)"  # regex pattern (required for regex parser)
-        # List of fields to capture in pattern (required for regex parser)
-        regex_fields:
-            - "date"
-            - "level"
-            - "message"
+        regex_pattern: "\\[(?P<date>.+)\\] [a-zA-Z0-9_\\-]+.(?P<level>[a-zA-Z0-9]+): (?P<message>.*)"  # regex pattern with group name which identify fields to capture (required for regex parser)
         # File list to include (required)
         # can contains "*" to match pattern or "**" to match all files.  
         files_included:
@@ -72,6 +66,7 @@ parsers: #(required)
 #
 # Alerts are used to send notifications to users.
 alerts: # (optional)
+    frequency: 5 # frequency in seconds to check alerts (optional)
     # Triggers define conditions that must be met to send an alert.
     triggers:
         -   name: "critical detected" # ID of the trigger, displayed in notification (required)
@@ -97,24 +92,24 @@ alerts: # (optional)
                 - { field: "level", operator: "not_start_with", value: "WARN" }
                 - { field: "message", operator: "match_regex", value: ".*Error.*" }
     # List of recipients to send notifications to
-    # "type" must contain one of the following types :
+    # "kind" must contain one of the following types :
     # - "email" : send notification using smtp to an email address
     # - "slack_webhooks" : send slack message using a webhook
     recipients: # (required)
-        -   type: "email" # (required)
-            recipient: "user@localhost.local"
-        -   type: "slack_webhook" # (required)
-            recipient: "https://hooks.slack.com/services/XXXX/XXXXX/XXXXX"
+#        -   kind: "email" # (required)
+#            recipient: "user@localhost.local"
+#        -   kind: "slack_webhook" # (required)
+#            recipient: "https://hooks.slack.com/services/XXXX/XXXXX/XXXXX"
 
 # SMTP configuration (optional but required for email notification)
 smtp:
     host: "localhost"
     port: 25
     username: ""
-    password: "" 
+    password: ""
     ssl_enabled: false # Is TLS enable (optional)
-    from_email: "noreply@localhost.local" # Email of the email sender (required)
-    from_name: "Spooter Bot" # Name of the email sender (required)
+    from_email: "spooter@localhost" # Email of the email sender (required)
+    from_name: "Spooter" # Name of the email sender (required)
 ```
 
 Next, run `spooter-agent` using:
@@ -143,13 +138,13 @@ First, you must create a configuration file `config_server.yml`.
 # Server configuration
 #
 debug: false
-  
+
 # SMTP configuration (optional but required for email notification)
 smtp:
     host: "localhost"
     port: 25
     username: ""
-    password: "" 
+    password: ""
     ssl_enabled: false # Is TLS enable (optional)
     from_email: "noreply@localhost.local" # Email of the email sender (required)
     from_name: "Spooter Bot" # Name of the email sender (required)
@@ -172,7 +167,6 @@ make build-agent
 ./bin/spooter-server -config=config_server.yaml
 ```
 
-
 ## Test
 
 You can use the provided binary to generate test data.
@@ -186,8 +180,8 @@ You can use the provided binary to generate test data.
 ./bin/gen_random_log.sh symfony CRITICAL 10 ~/Downloads/mylogfile.txt
 ```
 
-
 ## Regex patterns {#regexes}
 
-* Symfony logs regex : `\\[(.+)\\] [a-zA-Z0-9_\\-]+.([a-zA-Z0-9]+): (.*)`
-* Nginx access regex : `%{IPORHOST:visitor_ip} (?:-|(%{WORD}.%{WORD})) %{USER:ident} \[%{HTTPDATE:time_local}\] "%{METHOD:method} %{URIPATHPARAM:http_path} HTTP/%{NUMBER:http_version}" %{INT:status} %{INT:body_bytes_sent} "(?:-|(%{URI:referer}))" %{QS:user_agent}`
+* Symfony logs regex : `\\[(?P<date>.+)\\] [a-zA-Z0-9_\\-]+.(?P<level>[a-zA-Z0-9]+): (?P<message>.*)`
+* Nginx access
+  regex : `'(?im)(?P<ipaddress>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - .* \[(?P<dateandtime>\d{2}\/[a-z]{3}\/\d{4}:\d{2}:\d{2}:\d{2} (\+|\-)\d{4})\] ((\"(?P<method>GET|POST|HEAD|PUT|DELETE|CONNECT|OPTIONS|TRACE|PATCH) )(?P<url>.+)(http\/1\.1")) (?P<statuscode>\d{3}) (?P<bytessent>\d+) (?P<http_referer>[^\s]+)\"\s\"(?P<user_agent>[^\"]+)\"\s\"(?P<forward_for>[^\"]+)\"'`

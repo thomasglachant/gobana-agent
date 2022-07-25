@@ -2,15 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/thomasglachant/spooter/core"
 )
 
 const (
 	notifierLogPrefix            = "notification"
-	SubscriptionTypeEmail        = "email"
-	SubscriptionTypeSlackWebhook = "slack_webhook"
+	subscriptionTypeEmail        = "email"
+	subscriptionTypeSlackWebhook = "slack_webhook"
 )
 
 type Notification interface {
@@ -20,12 +18,12 @@ type Notification interface {
 }
 
 func SendNotification(notification Notification) error {
-	for _, recipient := range agentConfig.Alerts.Recipients {
-		if recipient.Type == SubscriptionTypeEmail {
+	for _, recipient := range config.Alerts.Recipients {
+		if recipient.Kind == subscriptionTypeEmail {
 			if err := sendEmail(recipient.Recipient, notification); err != nil {
 				return fmt.Errorf("error sending email: %s", err.Error())
 			}
-		} else if recipient.Type == SubscriptionTypeSlackWebhook {
+		} else if recipient.Kind == subscriptionTypeSlackWebhook {
 			if err := sendSlack(recipient.Recipient, notification); err != nil {
 				return fmt.Errorf("error sending email: %s", err.Error())
 			}
@@ -38,7 +36,7 @@ func sendEmail(email string, notification Notification) error {
 	core.Logger.Infof(notifierLogPrefix, "Send an email")
 
 	err := core.SendEmail(
-		&agentConfig.SMTP,
+		&config.SMTP,
 		email,
 		notification.Subject(),
 		notification.TemplateName(),
@@ -53,7 +51,7 @@ func sendEmail(email string, notification Notification) error {
 func sendSlack(webhookURL string, notification Notification) error {
 	// check if template exists
 	templateFile := fmt.Sprintf("templates/slack/%s.txt.tmpl", notification.TemplateName())
-	if _, err := os.Stat(templateFile); err != nil {
+	if !core.CheckTemplateExists(templateFile) {
 		return fmt.Errorf("template file \"%s\" not found", templateFile)
 	}
 

@@ -19,7 +19,7 @@ func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]i
 	m.SetAddressHeader("From", smtp.FromEmail, smtp.FromName)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", subject)
-	m.SetBody("text/plain", TemplateToHTML([]string{
+	m.SetBody("text/plain", TemplateToString([]string{
 		fmt.Sprintf("templates/email/%s.txt.tmpl", template),
 		"templates/email/_layout.txt.tmpl",
 	}, vars))

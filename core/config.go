@@ -13,13 +13,13 @@ import (
 )
 
 type SMTPConfig struct {
-	Host       string `yaml:"host" validate:"required"`
-	Port       int    `yaml:"port" validate:"required,min=1,max=65535"`
+	Host       string `yaml:"host" validate:"required" default:"localhost"`
+	Port       int    `yaml:"port" validate:"required,min=1,max=65535" default:"25"`
 	Username   string `yaml:"username"`
 	Password   string `yaml:"password"`
-	SSLEnabled bool   `yaml:"ssl_enabled"`
-	FromName   string `yaml:"from_name" validate:"required"`
-	FromEmail  string `yaml:"from_email" validate:"required,email"`
+	SSLEnabled bool   `yaml:"ssl_enabled" default:"false"`
+	FromName   string `yaml:"from_name" validate:"required" default:"Spooter"`
+	FromEmail  string `yaml:"from_email" validate:"required,email" default:"spooter@localhost"`
 }
 
 func ReadConfig(filename string, config interface{}) error {
