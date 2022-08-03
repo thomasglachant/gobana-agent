@@ -4,17 +4,21 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/thomasglachant/spooter/core"
+	"os"
+	"time"
 )
 
 var (
 	logPrefix = "agent"
 
-	config  *AgentConfig
+	// config
+	config *AgentConfig
+
+	// services
 	alerter *Alerter
 	watcher *Watcher
+	emitter *Emitter
 )
 
 // Filesystem which contains templates
@@ -26,8 +30,8 @@ var templateFs embed.FS
 var assetFs embed.FS
 
 // auto-generated during build
-var version string
-var date string
+var version = "?"
+var date = time.Now().Format("2006-01-02")
 
 func main() {
 	fmt.Printf("# spooter-agent v%s (%s)\n", version, date)
@@ -66,8 +70,15 @@ func main() {
 	// start processes
 	alerter = &Alerter{}
 	watcher = &Watcher{}
-	core.RunProcesses([]core.ProcessInterface{
+	processes := []core.ProcessInterface{
 		&core.ProcessStruct{RunningProcess: watcher},
 		&core.ProcessStruct{RunningProcess: alerter},
-	})
+	}
+
+	if config.Emitter.Enabled {
+		emitter = &Emitter{}
+		processes = append(processes, &core.ProcessStruct{RunningProcess: emitter})
+	}
+
+	core.RunProcesses(processes)
 }

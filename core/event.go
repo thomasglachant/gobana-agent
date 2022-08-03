@@ -10,14 +10,18 @@ var EventDispatcher = &eventBusStruct{
 	events: map[string]eventStruct{},
 }
 
+type EventData interface {
+	Name() string
+	Data() interface{}
+}
+
 type (
-	EventData         map[string]interface{}
 	eventCallbackInfo struct {
 		id       string
 		callback eventCallback
 	}
-	eventCallback  func(data EventData)
-	eventStruct    map[int][]eventCallbackInfo
+	eventCallback  func(data interface{})
+	eventStruct    map[int][]*eventCallbackInfo
 	eventBusStruct struct {
 		mu     sync.Mutex
 		events map[string]eventStruct
@@ -38,11 +42,11 @@ func (bus *eventBusStruct) Subscribe(description EventDescription) string {
 		bus.events[description.Name] = eventStruct{}
 	}
 	if _, exists := bus.events[description.Name][description.Priority]; !exists {
-		bus.events[description.Name][description.Priority] = []eventCallbackInfo{}
+		bus.events[description.Name][description.Priority] = []*eventCallbackInfo{}
 	}
 	eventUUID := uuid.NewV4().String()
 
-	bus.events[description.Name][description.Priority] = append(bus.events[description.Name][description.Priority], eventCallbackInfo{
+	bus.events[description.Name][description.Priority] = append(bus.events[description.Name][description.Priority], &eventCallbackInfo{
 		id:       eventUUID,
 		callback: description.Callback,
 	})
@@ -59,7 +63,7 @@ func (bus *eventBusStruct) Unsubscribe(subscribeID string) {
 	for k, events := range bus.events {
 		newEventList[k] = eventStruct{}
 		for k2, priorities := range events {
-			newEventList[k][k2] = []eventCallbackInfo{}
+			newEventList[k][k2] = []*eventCallbackInfo{}
 			for _, callbackInfo := range priorities {
 				if callbackInfo.id != subscribeID {
 					newEventList[k][k2] = append(newEventList[k][k2], callbackInfo)
@@ -71,11 +75,11 @@ func (bus *eventBusStruct) Unsubscribe(subscribeID string) {
 	bus.events = newEventList
 }
 
-func (bus *eventBusStruct) Dispatch(name string, data EventData) {
-	if events, ok := bus.events[name]; ok {
+func (bus *eventBusStruct) Dispatch(event EventData) {
+	if events, ok := bus.events[event.Name()]; ok {
 		for _, priorities := range events {
 			for _, callbackInfo := range priorities {
-				go callbackInfo.callback(data)
+				go callbackInfo.callback(event.Data())
 			}
 		}
 	}

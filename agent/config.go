@@ -37,12 +37,23 @@ type AlertConfigStruct struct {
 	Triggers   []TriggerConfigStruct   `yaml:"triggers" validate:"dive"`
 }
 
+type EmitterConfigStruct struct {
+	Enabled    bool   `yaml:"enabled" default:"false"`
+	Server     string `yaml:"server" validate:"required_if=Enabled true"`
+	Port       int64  `yaml:"port" validate:"required_if=Enabled true,min=1,max=65535" default:"59302"`
+	Secret     string `yaml:"secret" validate:"required_if=Enabled true" default:"myawesomesecret"`
+	Frequency  int64  `yaml:"frequency" validate:"required_if=Enabled true,min=1,max=3600" default:"5"`
+	Timeout    int64  `yaml:"timeout" validate:"required_if=Enabled true,min=1,max=60" default:"10"`
+	BufferSize int64  `yaml:"buffer_size" validate:"required_if=Enabled true,min=1,max=1000000" default:"10000"`
+}
+
 type AgentConfig struct {
 	Debug       bool                  `yaml:"debug" default:"false"`
 	Application string                `yaml:"application" validate:"required,regular_name"`
 	Server      string                `yaml:"server"`
 	Parsers     []*ParserConfigStruct `yaml:"parsers" validate:"required,gte=1,unique=Name,dive"`
 	Alerts      AlertConfigStruct     `yaml:"alerts" validate:""`
+	Emitter     EmitterConfigStruct   `yaml:"emitter" validate:""`
 	SMTP        core.SMTPConfig       `yaml:"smtp"`
 }
 

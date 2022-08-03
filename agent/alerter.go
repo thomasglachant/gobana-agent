@@ -53,11 +53,13 @@ type Alerter struct {
 	mu       sync.Mutex
 	exitChan chan bool
 
-	pendingAlerts Alerts
+	alertBuffer Alerts
 }
 
 func (alerter *Alerter) Run() error {
 	alerter.exitChan = make(chan bool)
+
+	// subscribe events
 	subscriptionID := core.EventDispatcher.Subscribe(core.EventDescription{
 		Name:     eventNameLogDiscover,
 		Priority: 0,
@@ -66,10 +68,11 @@ func (alerter *Alerter) Run() error {
 	defer core.EventDispatcher.Unsubscribe(subscriptionID)
 
 	core.ProcessInfiniteLoop(time.Duration(config.Alerts.Frequency)*time.Second, alerter.exitChan, func() {
-		core.Logger.Debugf(alerterLogPrefix, "Flush pending Alerts")
 		// flush pending Alerts
 		alerter.flush()
 	})
+	// execute last flush before exiting
+	alerter.flush()
 
 	return nil
 }
@@ -80,30 +83,32 @@ func (alerter *Alerter) HandleStop() {
 
 func (alerter *Alerter) addAlert(alert *Alert) {
 	alerter.mu.Lock()
-	alerter.pendingAlerts = append(alerter.pendingAlerts, alert)
+	alerter.alertBuffer = append(alerter.alertBuffer, alert)
 	alerter.mu.Unlock()
 
 	core.Logger.Debugf(alerterLogPrefix, "Add alert to pool")
 }
 
 func (alerter *Alerter) flush() {
-	if len(alerter.pendingAlerts) == 0 {
+	if len(alerter.alertBuffer) == 0 {
 		return
 	}
 
-	core.Logger.Debugf(alerterLogPrefix, "Flush pending Alerts")
+	core.Logger.Debugf(alerterLogPrefix, "Flush %d pending alerts", len(alerter.alertBuffer))
 
 	alerter.mu.Lock()
-	err := SendNotification(&alerter.pendingAlerts)
+	alerts := alerter.alertBuffer
+	alerter.alertBuffer = Alerts{}
+	alerter.mu.Unlock()
+
+	err := SendNotification(alerts)
 	if err != nil {
 		core.Logger.Errorf(alerterLogPrefix, "Error sending notification: %s", err)
 	}
-	alerter.pendingAlerts = Alerts{}
-	alerter.mu.Unlock()
 }
 
-func HandleParserTrigger(data core.EventData) {
-	line := data["logLine"].(*LogLine)
+func HandleParserTrigger(log interface{}) {
+	line := log.(*core.LogLine)
 
 	for _, trigger := range config.Alerts.Triggers {
 		go func(trigger TriggerConfigStruct) {

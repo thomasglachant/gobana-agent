@@ -27,6 +27,18 @@ const (
 	parserModeJSON  = "json"
 )
 
+type LogDiscoverEvent struct {
+	Log *core.LogLine
+}
+
+func (event *LogDiscoverEvent) Name() string {
+	return eventNameLogDiscover
+}
+
+func (event *LogDiscoverEvent) Data() interface{} {
+	return event.Log
+}
+
 type currentWatching struct {
 	parser   *ParserConfigStruct
 	fileName string
@@ -135,7 +147,7 @@ func (watcher *Watcher) startWatchFile(parser *ParserConfigStruct, file string) 
 	for line := range t.Lines {
 		core.Logger.Debugf(watcherLogPrefix, "Receive Line: %s", line.Text)
 
-		var log *LogLine
+		var log *core.LogLine
 		var err error
 		log, err = watcher.handleLine(cur, line.Text)
 		if err != nil {
@@ -148,9 +160,7 @@ func (watcher *Watcher) startWatchFile(parser *ParserConfigStruct, file string) 
 			core.Logger.Debugf(watcherLogPrefix, "Field %s: %s", k, v)
 		}
 
-		core.EventDispatcher.Dispatch(eventNameLogDiscover, core.EventData{
-			"logLine": log,
-		})
+		core.EventDispatcher.Dispatch(&LogDiscoverEvent{Log: log})
 	}
 
 	watcher.mu.Lock()
@@ -173,30 +183,16 @@ func (watcher *Watcher) endWatchFromTailKey(tailKey string) {
 	watcher.mu.Unlock()
 }
 
-type LogMetadata struct {
-	Application string
-	Server      string
-	Filename    string
-	Parser      string
-	CaptureDate time.Time
-}
-
-type LogLine struct {
-	Metadata LogMetadata
-	Date     time.Time
-	Raw      string
-	Fields   map[string]string
-}
-
 //nolint:gocyclo
-func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*LogLine, error) {
-	log := &LogLine{
-		Metadata: LogMetadata{
-			Application: config.Application,
-			Server:      config.Server,
-			Filename:    fileWatcher.fileName,
-			Parser:      fileWatcher.parser.Name,
-			CaptureDate: time.Now(),
+func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*core.LogLine, error) {
+	log := &core.LogLine{
+		Metadata: core.LogMetadata{
+			AgentVersion: version,
+			Application:  config.Application,
+			Server:       config.Server,
+			Filename:     fileWatcher.fileName,
+			Parser:       fileWatcher.parser.Name,
+			CaptureDate:  time.Now(),
 		},
 		Date:   time.Now(),
 		Raw:    line,

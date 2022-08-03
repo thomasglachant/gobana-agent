@@ -1,12 +1,14 @@
 #
 # Agent configuration
 #
-debug: false 
+## Debug mode enabled ? (optional, default: false)
+# debug: false 
 
-#
-# Metadata about the agent 
-application: "MyApp"  # Name of your application (required)
-server: "localhost"   # Name of your server (optional)
+## Name of your application (required)
+application: "MyApp"
+
+## Name of your server (optional)
+# server: "localhost"   
 
 #
 # Parsers are used to read and normalize logs 
@@ -54,6 +56,7 @@ parsers: #(required)
 
 #
 # Alerts are used to send notifications to users.
+#
 alerts: # (optional)
     frequency: 5 # Frequency of alerting (in minutes)
     
@@ -82,22 +85,53 @@ alerts: # (optional)
 #                - { field: "level", operator: "not_start_with", value: "WARN" }
 #                - { field: "message", operator: "match_regex", value: ".*Error.*" }
 
-#    # List of recipients to send notifications to
-#    # "kind" must contain one of the following types :
-#    # - "email" : send notification using smtp to an email address
-#    # - "slack_webhooks" : send slack message using a webhook
+# List of recipients to send notifications to
+# "kind" must contain one of the following types :
+# - "email" : send notification using smtp to an email address
+# - "slack_webhooks" : send slack message using a webhook
     recipients: # (required)
 #        -   kind: "email" # (required)
 #            recipient: "user@localhost.local"
 #        -   kind: "slack_webhook" # (required)
 #            recipient: "https://hooks.slack.com/services/XXXX/XXXXX/XXXXX"
 
+#
+# Centralized storage of logs
+#
+emitter:
+    ## Is cloud storage enabled ? (optional)
+    enabled: false
+    
+    ## Server ip or domain (required if enabled)
+    server: "localhost"
+    
+    ## Server port (optional)
+    # port: 59302
+    
+    ## Server secret (required if enabled)
+    secret: "secret"
+
+#
 # SMTP configuration (optional but required for email notification)
+#
 smtp:
+    ## Smtp port (required)
     host: "localhost"
-    port: 25
-    username: ""
-    password: ""
-    ssl_enabled: false # Is TLS enable (optional)
-    from_email: "spooter@localhost" # Email of the email sender (required)
-    from_name: "Spooter" # Name of the email sender (required)
+    
+    ## Smtp port (optional)
+    # port: 25
+    
+    ## Smtp username (optional)
+    # username: ""
+    
+    ## Smtp password (optional)
+    # password: ""
+    
+    ## Is Smtp encryption enabled? (optional)
+    # ssl_enabled: false
+    
+    ## Email of the email sender (required)
+    # from_email: "spooter@localhost" 
+    
+    ## Name of the email sender (required)
+    # from_name: "Spooter" 
