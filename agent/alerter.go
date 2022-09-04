@@ -61,7 +61,7 @@ func (alerter *Alerter) Run() error {
 
 	// subscribe events
 	subscriptionID := core.EventDispatcher.Subscribe(core.EventDescription{
-		Name:     eventNameLogDiscover,
+		Name:     eventNameEntryDiscover,
 		Priority: 0,
 		Callback: HandleParserTrigger,
 	})
@@ -107,8 +107,8 @@ func (alerter *Alerter) flush() {
 	}
 }
 
-func HandleParserTrigger(log interface{}) {
-	line := log.(*core.LogLine)
+func HandleParserTrigger(entryObj interface{}) {
+	entry := entryObj.(*core.Entry)
 
 	for _, trigger := range config.Alerts.Triggers {
 		go func(trigger TriggerConfigStruct) {
@@ -117,15 +117,15 @@ func HandleParserTrigger(log interface{}) {
 				fieldValue := ""
 				switch {
 				case triggerValue.Field == "_parser":
-					fieldValue = line.Metadata.Parser
+					fieldValue = entry.Metadata.Parser
 				case triggerValue.Field == "_filename":
-					fieldValue = line.Metadata.Filename
+					fieldValue = entry.Metadata.Filename
 				default:
-					if _, ok := line.Fields[triggerValue.Field]; !ok {
+					if _, ok := entry.Fields[triggerValue.Field]; !ok {
 						core.Logger.Errorf(alerterLogPrefix, "unable to check field value (field \"%s\" not exists)", triggerValue.Field)
 						continue
 					}
-					fieldValue = line.Fields[triggerValue.Field]
+					fieldValue = entry.Fields[triggerValue.Field]
 				}
 
 				match, err := checkTriggerValueMatch(fieldValue, triggerValue.Operator, triggerValue.Value)
@@ -145,18 +145,24 @@ func HandleParserTrigger(log interface{}) {
 					Date:        time.Now(),
 					Application: config.Application,
 					Server:      config.Server,
-					Filename:    line.Metadata.Filename,
-					ParserName:  line.Metadata.Parser,
+					Filename:    entry.Metadata.Filename,
+					ParserName:  entry.Metadata.Parser,
 					TriggerName: trigger.Name,
-					Fields:      line.Fields,
-					Raw:         line.Raw,
+					Fields:      entry.Fields,
+					Raw:         entry.Raw,
 				})
 			}
 		}(trigger)
 	}
 }
 
+//nolint:gocyclo
 func checkTriggerValueMatch(fieldValue, operator, operatorValue string) (bool, error) {
+	// special case : ignore empty values
+	if fieldValue == "" {
+		return false, nil
+	}
+
 	lowerFieldValue := strings.ToLower(fieldValue)
 	lowerOperatorValue := strings.ToLower(operatorValue)
 

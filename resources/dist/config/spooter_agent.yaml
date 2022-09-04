@@ -12,7 +12,7 @@ application: "MyApp"
 
 #
 # Parsers are used to read and normalize logs 
-# Normalize logs permit to have a uniform format, usable to alerting and analyses.
+# It permit to have a uniform format, usable to alerting and analyses.
 # 
 # There is two kinds of parsers : 
 # - `regex` : parse a log line using a regex to capture fields value.
@@ -29,14 +29,17 @@ parsers: #(required)
 #            level: "level_name"
 #            message: "message"
 #            user: "extra.user" # separate fields by "." to capture inner fields
-#
+#        # You can specify a date format to extract date from a field (optional)
+#        date_extract: #  (optional)
+#            field: "date" # field name (optional)
+#            format: "2006-01-02T15:04:05.999999999Z07:00" # date format (optional)
 #        # File list to include (required)
-#        # can contains "*" to match pattern or "**" to match all files.  
+#        # can contain "*" to match pattern or "**" to match all files.  
 #        files_included:
 #            - "/var/log/symfony/*.log"
 #            - "/var/log/**/*.log"
 #        # File list to exclude (optional)
-#        # can contains "*" to match pattern or "**" to match all files.
+#        # can contain "*" to match pattern or "**" to match all files.
 #        files_excluded:
 #            - "/var/log/symfony/prod.deprecations.log"
 
@@ -44,13 +47,17 @@ parsers: #(required)
 #    -   name: "example_regex" # ID of the parser, used for alerting and storage (required, must be unique)
 #        mode: "regex"  # enable regex mode (required for regex parser)
 #        regex_pattern: "\\[(?P<date>.+)\\] [a-zA-Z0-9_\\-]+.(?P<level>[a-zA-Z0-9]+): (?P<message>.*)"  # regex pattern with group name which identify fields to capture (required for regex parser)
+#        # You can specify a date format to extract date from a field (optional)
+#        date_extract: # (optional)
+#            field: "date" # field name (optional)
+#            format: "2006-01-02T15:04:05.999999999Z07:00" # date format (optional)
 #        # File list to include (required)
-#        # can contains "*" to match pattern or "**" to match all files.  
+#        # can contain "*" to match pattern or "**" to match all files.  
 #        files_included:
 #            - "/var/log/symfony/*.log"
 #            - "/var/log/**/*.log"
 #        # File list to exclude (optional)
-#        # can contains "*" to match pattern or "**" to match all files.
+#        # can contain "*" to match pattern or "**" to match all files.
 #        files_excluded:
 #            - "/var/log/symfony/prod.deprecations.log"
 

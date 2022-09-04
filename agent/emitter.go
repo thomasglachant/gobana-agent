@@ -12,23 +12,23 @@ import (
 )
 
 const (
-	emitterLogPrefix              = "emitter"
-	emitterTimeout                = 30 * time.Second
-	emitterFrequency              = 5 * time.Second
-	emitterMaxLogToKeepInBuffer   = 200000
-	emitterMaxLogToSendAtSameTime = 10000
+	emitterLogPrefix                  = "emitter"
+	emitterTimeout                    = 30 * time.Second
+	emitterFrequency                  = 5 * time.Second
+	emitterMaxEntriesToKeepInBuffer   = 200000
+	emitterMaxEntriesToSendAtSameTime = 10000
 
-	emitterEndpoint = "http://%s:%d/v1/logs"
+	emitterEndpoint = "http://%s:%d/v1/entries"
 )
 
 type Emitter struct {
-	pendingMutex sync.Mutex
-	isFlushing   sync.Mutex
-	exitChan     chan bool
-	logBuffer    []*core.LogLine
+	pendingMutex  sync.Mutex
+	isFlushing    sync.Mutex
+	exitChan      chan bool
+	entriesBuffer []*core.Entry
 
-	client     *http.Client
-	postLogURL string
+	client       *http.Client
+	postEntryURL string
 }
 
 func (emitter *Emitter) Run() error {
@@ -36,10 +36,10 @@ func (emitter *Emitter) Run() error {
 
 	// subscribe events
 	subscriptionID := core.EventDispatcher.Subscribe(core.EventDescription{
-		Name:     eventNameLogDiscover,
+		Name:     eventNameEntryDiscover,
 		Priority: 0,
 		Callback: func(data interface{}) {
-			emitter.addLogLine(data.(*core.LogLine))
+			emitter.addEntry(data.(*core.Entry))
 		},
 	})
 	defer core.EventDispatcher.Unsubscribe(subscriptionID)
@@ -48,17 +48,17 @@ func (emitter *Emitter) Run() error {
 	emitter.client = &http.Client{Timeout: emitterTimeout, Transport: &http.Transport{
 		DisableKeepAlives: true,
 	}}
-	emitter.postLogURL = fmt.Sprintf(emitterEndpoint, config.Emitter.Server, config.Emitter.Port)
+	emitter.postEntryURL = fmt.Sprintf(emitterEndpoint, config.Emitter.Server, config.Emitter.Port)
 
 	// run
 	core.ProcessInfiniteLoop(emitterFrequency, emitter.exitChan, func() {
-		if len(emitter.logBuffer) > 0 {
-			core.Logger.Infof(emitterLogPrefix, "%d logs pending", len(emitter.logBuffer))
+		if len(emitter.entriesBuffer) > 0 {
+			core.Logger.Infof(emitterLogPrefix, "%d entries pending", len(emitter.entriesBuffer))
 		}
 		// remove older data
 		emitter.cleanupBuffer(true)
 
-		// flush pending logs
+		// flush pending entries
 		emitter.flush()
 	})
 	// execute last flush before exiting
@@ -71,62 +71,62 @@ func (emitter *Emitter) HandleStop() {
 	emitter.exitChan <- true
 }
 
-func (emitter *Emitter) addLogLine(logLine *core.LogLine) {
+func (emitter *Emitter) addEntry(entry *core.Entry) {
 	go func() {
 		core.Logger.Debugf(emitterLogPrefix, "Add log to pool")
 
 		emitter.pendingMutex.Lock()
 		defer emitter.pendingMutex.Unlock()
 
-		emitter.logBuffer = append(emitter.logBuffer, logLine)
+		emitter.entriesBuffer = append(emitter.entriesBuffer, entry)
 		emitter.cleanupBuffer(false)
 	}()
 }
 
 func (emitter *Emitter) cleanupBuffer(withMutexlock bool) {
-	if int64(len(emitter.logBuffer)) <= emitterMaxLogToKeepInBuffer {
+	if int64(len(emitter.entriesBuffer)) <= emitterMaxEntriesToKeepInBuffer {
 		return
 	}
 
 	if withMutexlock {
 		emitter.pendingMutex.Lock()
 	}
-	startL := int64(len(emitter.logBuffer)) - emitterMaxLogToKeepInBuffer
-	emitter.logBuffer = emitter.logBuffer[startL:]
+	startL := int64(len(emitter.entriesBuffer)) - emitterMaxEntriesToKeepInBuffer
+	emitter.entriesBuffer = emitter.entriesBuffer[startL:]
 	if withMutexlock {
 		emitter.pendingMutex.Unlock()
 	}
 }
 
 func (emitter *Emitter) flush() {
-	if len(emitter.logBuffer) == 0 {
+	if len(emitter.entriesBuffer) == 0 {
 		return
 	}
 
-	core.Logger.Debugf(emitterLogPrefix, "Flush %d pending logs", len(emitter.logBuffer))
+	core.Logger.Debugf(emitterLogPrefix, "Flush %d pending entries", len(emitter.entriesBuffer))
 
 	// lock resources
 	emitter.isFlushing.Lock()
 	defer emitter.isFlushing.Unlock()
 
-	// get logs from queue
+	// get entries from queue
 	emitter.pendingMutex.Lock()
 
-	var nbLogToEmit int
-	if len(emitter.logBuffer) > emitterMaxLogToSendAtSameTime {
-		nbLogToEmit = emitterMaxLogToSendAtSameTime
+	var nbToEmit int
+	if len(emitter.entriesBuffer) > emitterMaxEntriesToSendAtSameTime {
+		nbToEmit = emitterMaxEntriesToSendAtSameTime
 	} else {
-		nbLogToEmit = len(emitter.logBuffer)
+		nbToEmit = len(emitter.entriesBuffer)
 	}
-	logLines := emitter.logBuffer[:nbLogToEmit]
-	emitter.logBuffer = emitter.logBuffer[nbLogToEmit:]
+	entries := emitter.entriesBuffer[:nbToEmit]
+	emitter.entriesBuffer = emitter.entriesBuffer[nbToEmit:]
 	emitter.pendingMutex.Unlock()
 
 	//
 	// compress and encrypt message
 	var encryptedData []byte
 	var encryptError error
-	encryptedData, encryptError = core.EncryptMessage(&core.SynchronizeLogsMessage{Logs: logLines}, config.Emitter.Secret)
+	encryptedData, encryptError = core.EncryptMessage(&core.SynchronizeEntriesMessage{Entries: entries}, config.Emitter.Secret)
 	if encryptError != nil {
 		core.Logger.Errorf(emitterLogPrefix, "Error encrypting data: %s", encryptError)
 		return
@@ -135,7 +135,7 @@ func (emitter *Emitter) flush() {
 	// create request
 	req, _ := http.NewRequest(
 		http.MethodPost,
-		emitter.postLogURL,
+		emitter.postEntryURL,
 		bytes.NewBuffer(encryptedData),
 	)
 	req.SetBasicAuth(core.SyncLogin, config.Emitter.Secret)
@@ -168,10 +168,10 @@ func (emitter *Emitter) flush() {
 	// not success: keep logs for next try
 	if !isSuccess {
 		emitter.pendingMutex.Lock()
-		emitter.logBuffer = append(logLines, emitter.logBuffer...)
+		emitter.entriesBuffer = append(entries, emitter.entriesBuffer...)
 		emitter.cleanupBuffer(false)
 		emitter.pendingMutex.Unlock()
 	}
 
-	core.Logger.Debugf(emitterLogPrefix, "%d logs emitted", len(logLines))
+	core.Logger.Debugf(emitterLogPrefix, "%d entries emitted", len(entries))
 }

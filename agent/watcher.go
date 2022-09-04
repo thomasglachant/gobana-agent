@@ -21,22 +21,22 @@ const (
 	watcherLogPrefix = "watcher"
 	watcherTimer     = 1 * time.Second
 
-	eventNameLogDiscover = "agent.log.discover"
+	eventNameEntryDiscover = "agent.log.discover"
 
 	parserModeRegex = "regex"
 	parserModeJSON  = "json"
 )
 
-type LogDiscoverEvent struct {
-	Log *core.LogLine
+type EntryDiscoverEvent struct {
+	Entry *core.Entry
 }
 
-func (event *LogDiscoverEvent) Name() string {
-	return eventNameLogDiscover
+func (event *EntryDiscoverEvent) Name() string {
+	return eventNameEntryDiscover
 }
 
-func (event *LogDiscoverEvent) Data() interface{} {
-	return event.Log
+func (event *EntryDiscoverEvent) Data() interface{} {
+	return event.Entry
 }
 
 type currentWatching struct {
@@ -147,20 +147,20 @@ func (watcher *Watcher) startWatchFile(parser *ParserConfigStruct, file string) 
 	for line := range t.Lines {
 		core.Logger.Debugf(watcherLogPrefix, "Receive Line: %s", line.Text)
 
-		var log *core.LogLine
+		var entry *core.Entry
 		var err error
-		log, err = watcher.handleLine(cur, line.Text)
+		entry, err = watcher.handleLine(cur, line.Text)
 		if err != nil {
 			core.Logger.Errorf(watcherLogPrefix, "Error while handle line: %s", err)
 			continue
 		}
 
 		core.Logger.Debugf(watcherLogPrefix, "Line handled")
-		for k, v := range log.Fields {
+		for k, v := range entry.Fields {
 			core.Logger.Debugf(watcherLogPrefix, "Field %s: %s", k, v)
 		}
 
-		core.EventDispatcher.Dispatch(&LogDiscoverEvent{Log: log})
+		core.EventDispatcher.Dispatch(&EntryDiscoverEvent{Entry: entry})
 	}
 
 	watcher.mu.Lock()
@@ -183,10 +183,10 @@ func (watcher *Watcher) endWatchFromTailKey(tailKey string) {
 	watcher.mu.Unlock()
 }
 
-//nolint:gocyclo
-func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*core.LogLine, error) {
-	log := &core.LogLine{
-		Metadata: core.LogMetadata{
+func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*core.Entry, error) {
+	// default values
+	entry := &core.Entry{
+		Metadata: core.EntryMetadata{
 			AgentVersion: version,
 			Application:  config.Application,
 			Server:       config.Server,
@@ -199,76 +199,127 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 		Fields: map[string]string{},
 	}
 
+	// parse log line
 	switch {
 	case fileWatcher.parser.Mode == parserModeRegex:
-		var regex *regexp.Regexp
-		var ok bool
-		if regex, ok = watcher.regexCache[fileWatcher.parser.Name]; !ok {
-			watcher.mu.Lock()
-			watcher.regexCache[fileWatcher.parser.Name] = regexp.MustCompile(fileWatcher.parser.RegexPattern)
-			regex = watcher.regexCache[fileWatcher.parser.Name]
-			watcher.mu.Unlock()
-		}
-		matches := regex.FindStringSubmatch(line)
-		for i, name := range regex.SubexpNames() {
-			if i != 0 && name != "" {
-				log.Fields[name] = matches[i]
-			}
+		if err := watcher.handleParseRegex(fileWatcher, entry, line); err != nil {
+			return nil, fmt.Errorf("error while handle regex: %s", err)
 		}
 	case fileWatcher.parser.Mode == parserModeJSON:
-		jsonData := map[string]interface{}{}
-		if err := json.Unmarshal([]byte(line), &jsonData); err != nil {
-			return nil, fmt.Errorf("unable to parse line as json: %s", err)
-		}
-		for internalFieldName, jsonField := range fileWatcher.parser.JSONFields {
-			// json field contain "." => use json path
-			if strings.Contains(jsonField, ".") {
-				splitByDot := strings.Split(jsonField, ".")
-				var cur interface{} = jsonData
-				if len(splitByDot) > 1 {
-					for _, part := range splitByDot {
-						if _, ok := cur.(map[string]interface{})[part]; ok {
-							cur = cur.(map[string]interface{})[part]
-						} else {
-							cur = nil
-							break
-						}
-					}
-					jsonData[jsonField] = cur
-				}
-			}
-
-			// jsonField not exists
-			if _, ok := jsonData[jsonField]; !ok {
-				continue
-			}
-			// jsonField is nil
-			if jsonData[jsonField] == nil {
-				log.Fields[internalFieldName] = ""
-				continue
-			}
-
-			switch reflect.TypeOf(jsonData[jsonField]).Kind() {
-			case reflect.String:
-				log.Fields[internalFieldName] = jsonData[jsonField].(string)
-			case reflect.Float64:
-				if core.IsDecimal(jsonData[jsonField].(float64)) {
-					log.Fields[internalFieldName] = fmt.Sprintf("%d", int64(jsonData[jsonField].(float64)))
-				} else {
-					log.Fields[internalFieldName] = fmt.Sprintf("%f", jsonData[jsonField])
-				}
-			case reflect.Int:
-				log.Fields[internalFieldName] = fmt.Sprintf("%d", jsonData[jsonField].(int64))
-			case reflect.Map:
-				content, _ := json.Marshal(jsonData[jsonField])
-				log.Fields[internalFieldName] = string(content)
-			default:
-				log.Fields[internalFieldName] = fmt.Sprintf("%v", jsonData[jsonField])
-			}
+		if err := watcher.handleParseJSON(fileWatcher, entry, line); err != nil {
+			return nil, fmt.Errorf("error while handle json: %s", err)
 		}
 	default:
 		return nil, fmt.Errorf("unknown mode %s", fileWatcher.parser.Mode)
 	}
 
-	return log, nil
+	// extract date from entry
+	if err := watcher.extractDate(fileWatcher, entry); err != nil {
+		return nil, fmt.Errorf("error while extract date: %s", err)
+	}
+
+	return entry, nil
+}
+
+func (watcher *Watcher) handleParseRegex(fileWatcher *currentWatching, entry *core.Entry, line string) error {
+	var regex *regexp.Regexp
+	var ok bool
+	if regex, ok = watcher.regexCache[fileWatcher.parser.Name]; !ok {
+		watcher.mu.Lock()
+		watcher.regexCache[fileWatcher.parser.Name] = regexp.MustCompile(fileWatcher.parser.RegexPattern)
+		regex = watcher.regexCache[fileWatcher.parser.Name]
+		watcher.mu.Unlock()
+	}
+
+	matches := regex.FindStringSubmatch(line)
+	// if no match, return error
+	if len(matches) == 0 {
+		return fmt.Errorf("line not match regex (%s)", line)
+	}
+	// extract fields from matches
+	for i, name := range regex.SubexpNames() {
+		if i == 0 || name == "" {
+			continue
+		}
+		if len(matches) >= i+1 {
+			entry.Fields[name] = matches[i]
+		} else {
+			entry.Fields[name] = ""
+		}
+	}
+
+	return nil
+}
+
+func (watcher *Watcher) handleParseJSON(fileWatcher *currentWatching, entry *core.Entry, line string) error {
+	jsonData := map[string]interface{}{}
+	if err := json.Unmarshal([]byte(line), &jsonData); err != nil {
+		return fmt.Errorf("unable to parse line as json: %s", err)
+	}
+	for internalFieldName, jsonField := range fileWatcher.parser.JSONFields {
+		// json field contain "." => use json path
+		if strings.Contains(jsonField, ".") {
+			splitByDot := strings.Split(jsonField, ".")
+			var cur interface{} = jsonData
+			if len(splitByDot) > 1 {
+				for _, part := range splitByDot {
+					if _, ok := cur.(map[string]interface{})[part]; ok {
+						cur = cur.(map[string]interface{})[part]
+					} else {
+						cur = nil
+						break
+					}
+				}
+				jsonData[jsonField] = cur
+			}
+		}
+
+		// jsonField not exists
+		if _, ok := jsonData[jsonField]; !ok {
+			continue
+		}
+		// jsonField is nil
+		if jsonData[jsonField] == nil {
+			entry.Fields[internalFieldName] = ""
+			continue
+		}
+
+		switch reflect.TypeOf(jsonData[jsonField]).Kind() {
+		case reflect.String:
+			entry.Fields[internalFieldName] = jsonData[jsonField].(string)
+		case reflect.Float64:
+			if core.IsDecimal(jsonData[jsonField].(float64)) {
+				entry.Fields[internalFieldName] = fmt.Sprintf("%d", int64(jsonData[jsonField].(float64)))
+			} else {
+				entry.Fields[internalFieldName] = fmt.Sprintf("%f", jsonData[jsonField])
+			}
+		case reflect.Int:
+			entry.Fields[internalFieldName] = fmt.Sprintf("%d", jsonData[jsonField].(int64))
+		case reflect.Map:
+			content, _ := json.Marshal(jsonData[jsonField])
+			entry.Fields[internalFieldName] = string(content)
+		default:
+			entry.Fields[internalFieldName] = fmt.Sprintf("%v", jsonData[jsonField])
+		}
+	}
+
+	return nil
+}
+
+func (watcher *Watcher) extractDate(fileWatcher *currentWatching, entry *core.Entry) error {
+	// date extraction
+	if fileWatcher.parser.DateExtract.Field != "" {
+		// search for date field
+		if _, ok := entry.Fields[fileWatcher.parser.DateExtract.Field]; ok {
+			// date field found
+			date, err := time.Parse(fileWatcher.parser.DateExtract.Format, entry.Fields[fileWatcher.parser.DateExtract.Field])
+			if err != nil {
+				core.Logger.Errorf(watcherLogPrefix, "Error while parsing date: %s", err)
+				return err
+			}
+			entry.Date = date
+		}
+	}
+
+	return nil
 }

@@ -4,9 +4,10 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"github.com/thomasglachant/spooter/core"
 	"os"
 	"time"
+
+	"github.com/thomasglachant/spooter/core"
 )
 
 var (
