@@ -23,10 +23,12 @@ var (
 )
 
 // Filesystem which contains templates
+//
 //go:embed templates/**/*
 var templateFs embed.FS
 
 // Filesystem which contains assets
+//
 //go:embed assets/**/*
 var assetFs embed.FS
 

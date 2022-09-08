@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -133,7 +134,8 @@ func (emitter *Emitter) flush() {
 	}
 
 	// create request
-	req, _ := http.NewRequest(
+	req, _ := http.NewRequestWithContext(
+		context.Background(),
 		http.MethodPost,
 		emitter.postEntryURL,
 		bytes.NewBuffer(encryptedData),
