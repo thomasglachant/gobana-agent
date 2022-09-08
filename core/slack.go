@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,7 +15,7 @@ type SlackRequest struct {
 
 func SendSlackNotification(webhookURL string, slackReq SlackRequest) error {
 	slackBody, _ := json.Marshal(slackReq)
-	req, err := http.NewRequest(http.MethodPost, webhookURL, bytes.NewBuffer(slackBody))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, webhookURL, bytes.NewBuffer(slackBody))
 	if err != nil {
 		return fmt.Errorf("error during call Slack : %s", err)
 	}
