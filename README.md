@@ -1,4 +1,4 @@
-# Spooter Agent
+# Spooter
 
 Spooter is a simple, fast, and powerful log monitoring tool.
 
@@ -17,13 +17,13 @@ Next, run `spooter-agent` using:
 ################
 #   Makefile   #
 ################
-make start-agent config=config_agent.yaml
+make start config=config_agent.yaml
 
 ################
 # Command line #
 ################
 # Build
-make build-agent
+make build
 # Run
 ./bin/spooter-agent -config=config_agent.yaml
 ```
