@@ -21,13 +21,11 @@ jobs:
 
       - name: Check go mod
         run: |
-          for i in agent server core; do
             go mod tidy
             git diff --exit-code go.mod
-          done
 
       - name: Build agent
-        run: make build-agent
+        run: make build
 
       - name: Test fmt
         run: make fmt
