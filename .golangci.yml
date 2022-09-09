@@ -21,7 +21,7 @@ linters-settings:
     lines: 100
     statements: 50
   gci:
-    local-prefixes: github.com/thomasglachant/spooter
+    local-prefixes: github.com/thomasglachant/spooter-agent
   goconst:
     min-len: 2
     min-occurrences: 2
@@ -38,7 +38,7 @@ linters-settings:
   lll:
     line-length: 140
   goimports:
-    local-prefixes: github.com/thomasglachant/spooter
+    local-prefixes: github.com/thomasglachant/spooter-agent
   gocritic:
     enabled-tags:
       - diagnostic

@@ -1,4 +1,4 @@
-# Spooter
+# Spooter Agent
 
 Spooter is a simple, fast, and powerful log monitoring tool.
 

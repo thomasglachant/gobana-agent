@@ -2,8 +2,10 @@ package agent
 
 import (
 	"fmt"
-	"github.com/creasty/defaults"
 	"os"
+
+	"github.com/creasty/defaults"
+
 	"spooter-agent/core"
 )
 

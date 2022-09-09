@@ -33,7 +33,7 @@ nfpms:
       package_name: spooter-agent
       
       vendor: thomasglachant
-      homepage: https://github.com/thomasglachant/spooter
+      homepage: https://github.com/thomasglachant/spooter-agent
       maintainer: Thomas Glachant <thomas@glth.fr>
       
       formats:
@@ -58,7 +58,7 @@ snapshot:
 release:
     github:
         owner: thomasglachant
-        name: spooter
+        name: spooter-agent
     prerelease: auto
 
 changelog:

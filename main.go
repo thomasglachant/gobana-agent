@@ -4,9 +4,10 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"time"
+
 	"spooter-agent/agent"
 	"spooter-agent/core"
-	"time"
 )
 
 // Filesystem which contains templates

@@ -2,7 +2,7 @@
 
 [Unit]
 Description=Spooter Agent
-Documentation=https://github.com/thomasglachant/spooter
+Documentation=https://github.com/thomasglachant/spooter-agent
 After=network.target
 
 [Service]
