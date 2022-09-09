@@ -48,9 +48,9 @@ nfpms:
             type: config
       
       scripts:
-          postinstall: ./resources/dist/scripts/postinstall_agent.sh
-          preremove: ./resources/dist/scripts/preremove_agent.sh
-          postremove: ./resources/dist/scripts/postremove_agent.sh
+          postinstall: ./resources/dist/scripts/postinstall.sh
+          preremove: ./resources/dist/scripts/preremove.sh
+          postremove: ./resources/dist/scripts/postremove.sh
 
 snapshot:
     name_template: "{{ incpatch .Version }}-next"
