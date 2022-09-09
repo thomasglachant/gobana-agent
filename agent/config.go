@@ -1,9 +1,10 @@
-package main
+package agent
 
 import (
+	"fmt"
 	"github.com/creasty/defaults"
-
-	"github.com/thomasglachant/spooter/core"
+	"os"
+	"spooter-agent/core"
 )
 
 type ParserConfigStruct struct {
@@ -68,4 +69,20 @@ func (s *AgentConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	return nil
+}
+
+func CheckConfig(configFile string) {
+	if err := core.ReadConfig(configFile, AppConfig); err != nil {
+		fmt.Printf("Invalid AppConfig file : %s\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("Config file is valid\n")
+	os.Exit(0)
+}
+
+func LoadConfig(configFile string) {
+	core.Logger.Infof(logPrefix, "load AppConfig from %s", configFile)
+	if err := core.ReadConfig(configFile, AppConfig); err != nil {
+		core.Logger.Criticalf(logPrefix, "unable to load agent AppConfig : %s", err)
+	}
 }

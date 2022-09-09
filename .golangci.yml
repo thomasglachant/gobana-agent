@@ -8,11 +8,11 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-          - (github.com/thomasglachant/spooter/core.LogInterface).Criticalf
-          - (github.com/thomasglachant/spooter/core.LogInterface).Infof
-          - (github.com/thomasglachant/spooter/core.LogInterface).Errorf
-          - (github.com/thomasglachant/spooter/core.LogInterface).Noticef
-          - (github.com/thomasglachant/spooter/core.LogInterface).Debugf
+          - (spooter-agent/core.LogInterface).Criticalf
+          - (spooter-agent/core.LogInterface).Infof
+          - (spooter-agent/core.LogInterface).Errorf
+          - (spooter-agent/core.LogInterface).Noticef
+          - (spooter-agent/core.LogInterface).Debugf
   gocyclo:
     min-complexity: 15
   dupl:

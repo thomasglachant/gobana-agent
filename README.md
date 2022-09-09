@@ -28,29 +28,6 @@ make build-agent
 ./bin/spooter-agent -config=config_agent.yaml
 ```
 
-## Server mode
-
-First, you must create a configuration file `config_server.yml`.
-
-Create your own config file using [server configuration file template](resources/dist/config/spooter_server.yaml)
-
-Next, run `spooter-server` using:
-
-```bash
-################
-#   Makefile   #
-################
-make start-aservergent config=config_server.yaml
-
-################
-# Command line #
-################
-# Build
-make build-agent
-# Run
-./bin/spooter-server -config=config_server.yaml
-```
-
 ## Test
 
 You can use the provided binary to generate test data.

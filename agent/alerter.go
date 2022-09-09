@@ -1,4 +1,4 @@
-package main
+package agent
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/thomasglachant/spooter/core"
+	"spooter-agent/core"
 )
 
 const (
@@ -67,7 +67,7 @@ func (alerter *Alerter) Run() error {
 	})
 	defer core.EventDispatcher.Unsubscribe(subscriptionID)
 
-	core.ProcessInfiniteLoop(time.Duration(config.Alerts.Frequency)*time.Second, alerter.exitChan, func() {
+	core.ProcessInfiniteLoop(time.Duration(AppConfig.Alerts.Frequency)*time.Second, alerter.exitChan, func() {
 		// flush pending Alerts
 		alerter.flush()
 	})
@@ -110,7 +110,7 @@ func (alerter *Alerter) flush() {
 func HandleParserTrigger(entryObj interface{}) {
 	entry := entryObj.(*core.Entry)
 
-	for _, trigger := range config.Alerts.Triggers {
+	for _, trigger := range AppConfig.Alerts.Triggers {
 		go func(trigger TriggerConfigStruct) {
 			allFieldsMatch := true
 			for _, triggerValue := range trigger.Values {
@@ -143,8 +143,8 @@ func HandleParserTrigger(entryObj interface{}) {
 				core.Logger.Infof(alerterLogPrefix, "Line match with trigger \"%s\"", trigger.Name)
 				alerter.addAlert(&Alert{
 					Date:        time.Now(),
-					Application: config.Application,
-					Server:      config.Server,
+					Application: AppConfig.Application,
+					Server:      AppConfig.Server,
 					Filename:    entry.Metadata.Filename,
 					ParserName:  entry.Metadata.Parser,
 					TriggerName: trigger.Name,

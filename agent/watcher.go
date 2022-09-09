@@ -1,4 +1,4 @@
-package main
+package agent
 
 import (
 	"crypto/sha256"
@@ -14,7 +14,7 @@ import (
 
 	"github.com/hpcloud/tail"
 
-	"github.com/thomasglachant/spooter/core"
+	"spooter-agent/core"
 )
 
 const (
@@ -85,7 +85,7 @@ func (watcher *Watcher) cleanUpVanishedFiles() {
 }
 
 func (watcher *Watcher) discoverFilesToWatch() error {
-	for _, parser := range config.Parsers {
+	for _, parser := range AppConfig.Parsers {
 		includedFiles, err := core.GetFilesMatchingPatterns(parser.FilesIncluded)
 		if err != nil {
 			return fmt.Errorf("error while retrieve included files %s: %s", parser.FilesIncluded, err)
@@ -187,9 +187,9 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 	// default values
 	entry := &core.Entry{
 		Metadata: core.EntryMetadata{
-			AgentVersion: version,
-			Application:  config.Application,
-			Server:       config.Server,
+			AgentVersion: AppVersion,
+			Application:  AppConfig.Application,
+			Server:       AppConfig.Server,
 			Filename:     fileWatcher.fileName,
 			Parser:       fileWatcher.parser.Name,
 			CaptureDate:  time.Now(),

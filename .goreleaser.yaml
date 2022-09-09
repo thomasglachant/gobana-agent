@@ -18,22 +18,6 @@ builds:
             - -trimpath
         ldflags:
             - -s -w    
-    -   id: "spooter-server"
-        binary: "spooter-server"
-        dir: server
-        env:
-            - CGO_ENABLED=0
-            - GO111MODULE=on
-        goos:
-            - linux
-            - darwin
-        goarch:
-            - amd64
-            - arm64
-        flags:
-            - -trimpath
-        ldflags:
-            - -s -w
 archives:
     -   replacements:
             linux: Linux
@@ -67,29 +51,6 @@ nfpms:
           postinstall: ./resources/dist/scripts/postinstall_agent.sh
           preremove: ./resources/dist/scripts/preremove_agent.sh
           postremove: ./resources/dist/scripts/postremove_agent.sh
-          
-    - id: server
-      package_name: spooter-server
-      
-      vendor: thomasglachant
-      homepage: https://github.com/thomasglachant/spooter
-      maintainer: Thomas Glachant <thomas@glth.fr>
-      
-      formats:
-          - deb
-      
-      bindir: /usr/bin
-      contents:
-          - src: ./resources/dist/init/spooter-server.service
-            dst: /lib/systemd/system/spooter-server.service
-          - src: ./resources/dist/config/spooter_server.yaml
-            dst: /etc/spooter/server.yaml
-            type: config
-      
-      scripts:
-          postinstall: ./resources/dist/scripts/postinstall_server.sh
-          preremove: ./resources/dist/scripts/preremove_server.sh
-          postremove: ./resources/dist/scripts/postremove_server.sh
 
 snapshot:
     name_template: "{{ incpatch .Version }}-next"

@@ -1,4 +1,4 @@
-package main
+package agent
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/thomasglachant/spooter/core"
+	"spooter-agent/core"
 )
 
 const (
@@ -49,7 +49,7 @@ func (emitter *Emitter) Run() error {
 	emitter.client = &http.Client{Timeout: emitterTimeout, Transport: &http.Transport{
 		DisableKeepAlives: true,
 	}}
-	emitter.postEntryURL = fmt.Sprintf(emitterEndpoint, config.Emitter.Server, config.Emitter.Port)
+	emitter.postEntryURL = fmt.Sprintf(emitterEndpoint, AppConfig.Emitter.Server, AppConfig.Emitter.Port)
 
 	// run
 	core.ProcessInfiniteLoop(emitterFrequency, emitter.exitChan, func() {
@@ -127,7 +127,7 @@ func (emitter *Emitter) flush() {
 	// compress and encrypt message
 	var encryptedData []byte
 	var encryptError error
-	encryptedData, encryptError = core.EncryptMessage(&core.SynchronizeEntriesMessage{Entries: entries}, config.Emitter.Secret)
+	encryptedData, encryptError = core.EncryptMessage(&core.SynchronizeEntriesMessage{Entries: entries}, AppConfig.Emitter.Secret)
 	if encryptError != nil {
 		core.Logger.Errorf(emitterLogPrefix, "Error encrypting data: %s", encryptError)
 		return
@@ -140,7 +140,7 @@ func (emitter *Emitter) flush() {
 		emitter.postEntryURL,
 		bytes.NewBuffer(encryptedData),
 	)
-	req.SetBasicAuth(core.SyncLogin, config.Emitter.Secret)
+	req.SetBasicAuth(core.SyncLogin, AppConfig.Emitter.Secret)
 
 	// do request
 	resp, err := emitter.client.Do(req)

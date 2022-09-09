@@ -28,14 +28,12 @@ jobs:
 
       - name: Build agent
         run: make build-agent
-      - name: Build server
-        run: make build-server
 
-      - name: Test Fmt
+      - name: Test fmt
         run: make fmt
 
-      - name: Test Linter
+      - name: Test linter
         run: make lint
 
-      - name: Tests Unit
+      - name: Tests unit
         run: make test
