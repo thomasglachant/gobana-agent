@@ -49,14 +49,18 @@ func (alerts Alerts) Data() map[string]interface{} {
 	}
 }
 
-type Alerter struct {
+type AlerterProcess struct {
 	mu       sync.Mutex
 	exitChan chan bool
 
 	alertBuffer Alerts
 }
 
-func (alerter *Alerter) Run() error {
+func (alerter *AlerterProcess) Name() string {
+	return alerterLogPrefix
+}
+
+func (alerter *AlerterProcess) Run() error {
 	alerter.exitChan = make(chan bool)
 
 	// subscribe events
@@ -77,19 +81,19 @@ func (alerter *Alerter) Run() error {
 	return nil
 }
 
-func (alerter *Alerter) HandleStop() {
+func (alerter *AlerterProcess) HandleStop() {
 	alerter.exitChan <- true
 }
 
-func (alerter *Alerter) addAlert(alert *Alert) {
+func (alerter *AlerterProcess) addAlert(alert *Alert) {
 	alerter.mu.Lock()
 	alerter.alertBuffer = append(alerter.alertBuffer, alert)
 	alerter.mu.Unlock()
 
-	core.Logger.Debugf(alerterLogPrefix, "Add alert to pool")
+	core.Logger.Debugf(alerter.Name(), "Add alert to pool")
 }
 
-func (alerter *Alerter) flush() {
+func (alerter *AlerterProcess) flush() {
 	if len(alerter.alertBuffer) == 0 {
 		return
 	}
@@ -141,7 +145,7 @@ func HandleParserTrigger(entryObj interface{}) {
 
 			if allFieldsMatch {
 				core.Logger.Infof(alerterLogPrefix, "Line match with trigger \"%s\"", trigger.Name)
-				alerter.addAlert(&Alert{
+				Alerter.addAlert(&Alert{
 					Date:        time.Now(),
 					Application: AppConfig.Application,
 					Server:      AppConfig.Server,

@@ -109,6 +109,9 @@ emitter:
     ## Is cloud storage enabled ? (optional)
     enabled: false
     
+    ## Workspace ID (required if enabled)
+    workspace: "myapplication"
+    
     ## Server ip or domain (required if enabled)
     server: "localhost"
     

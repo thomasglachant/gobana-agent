@@ -45,7 +45,7 @@ type currentWatching struct {
 	tail     *tail.Tail
 }
 
-type Watcher struct {
+type WatcherProcess struct {
 	mu       sync.Mutex
 	exitChan chan bool
 
@@ -53,13 +53,17 @@ type Watcher struct {
 	regexCache   map[string]*regexp.Regexp
 }
 
-func (watcher *Watcher) Run() error {
+func (watcher *WatcherProcess) Name() string {
+	return watcherLogPrefix
+}
+
+func (watcher *WatcherProcess) Run() error {
 	watcher.regexCache = make(map[string]*regexp.Regexp)
 	watcher.currentTails = map[string]*currentWatching{}
 	watcher.exitChan = make(chan bool)
 
 	core.ProcessInfiniteLoop(watcherTimer, watcher.exitChan, func() {
-		// execute watcher
+		// execute Watcher
 		if err := watcher.discoverFilesToWatch(); err != nil {
 			core.Logger.Errorf(watcherLogPrefix, "Error while discover files to watch: %s", err)
 		}
@@ -69,14 +73,14 @@ func (watcher *Watcher) Run() error {
 	return nil
 }
 
-func (watcher *Watcher) HandleStop() {
+func (watcher *WatcherProcess) HandleStop() {
 	for k := range watcher.currentTails {
 		watcher.endWatchFromTailKey(k)
 	}
 	watcher.exitChan <- true
 }
 
-func (watcher *Watcher) cleanUpVanishedFiles() {
+func (watcher *WatcherProcess) cleanUpVanishedFiles() {
 	for k, v := range watcher.currentTails {
 		if _, err := os.Stat(v.fileName); err != nil {
 			watcher.endWatchFromTailKey(k)
@@ -84,7 +88,7 @@ func (watcher *Watcher) cleanUpVanishedFiles() {
 	}
 }
 
-func (watcher *Watcher) discoverFilesToWatch() error {
+func (watcher *WatcherProcess) discoverFilesToWatch() error {
 	for _, parser := range AppConfig.Parsers {
 		includedFiles, err := core.GetFilesMatchingPatterns(parser.FilesIncluded)
 		if err != nil {
@@ -112,11 +116,11 @@ func (watcher *Watcher) discoverFilesToWatch() error {
 	return nil
 }
 
-func (watcher *Watcher) genTailKey(parser *ParserConfigStruct, file string) string {
+func (watcher *WatcherProcess) genTailKey(parser *ParserConfigStruct, file string) string {
 	return fmt.Sprintf("%s-%s", sha256.New().Sum([]byte(parser.Name)), file)
 }
 
-func (watcher *Watcher) startWatchFile(parser *ParserConfigStruct, file string) {
+func (watcher *WatcherProcess) startWatchFile(parser *ParserConfigStruct, file string) {
 	core.Logger.Infof(watcherLogPrefix, "Start watching file %s", file)
 
 	t, err := tail.TailFile(
@@ -168,7 +172,7 @@ func (watcher *Watcher) startWatchFile(parser *ParserConfigStruct, file string) 
 	watcher.mu.Unlock()
 }
 
-func (watcher *Watcher) endWatchFromTailKey(tailKey string) {
+func (watcher *WatcherProcess) endWatchFromTailKey(tailKey string) {
 	if _, ok := watcher.currentTails[tailKey]; !ok {
 		return
 	}
@@ -183,12 +187,13 @@ func (watcher *Watcher) endWatchFromTailKey(tailKey string) {
 	watcher.mu.Unlock()
 }
 
-func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*core.Entry, error) {
+func (watcher *WatcherProcess) handleLine(fileWatcher *currentWatching, line string) (*core.Entry, error) {
 	// default values
 	entry := &core.Entry{
 		Metadata: core.EntryMetadata{
 			AgentVersion: AppVersion,
 			Application:  AppConfig.Application,
+			Workspace:    AppConfig.Emitter.WorkspaceID,
 			Server:       AppConfig.Server,
 			Filename:     fileWatcher.fileName,
 			Parser:       fileWatcher.parser.Name,
@@ -221,7 +226,7 @@ func (watcher *Watcher) handleLine(fileWatcher *currentWatching, line string) (*
 	return entry, nil
 }
 
-func (watcher *Watcher) handleParseRegex(fileWatcher *currentWatching, entry *core.Entry, line string) error {
+func (watcher *WatcherProcess) handleParseRegex(fileWatcher *currentWatching, entry *core.Entry, line string) error {
 	var regex *regexp.Regexp
 	var ok bool
 	if regex, ok = watcher.regexCache[fileWatcher.parser.Name]; !ok {
@@ -251,7 +256,7 @@ func (watcher *Watcher) handleParseRegex(fileWatcher *currentWatching, entry *co
 	return nil
 }
 
-func (watcher *Watcher) handleParseJSON(fileWatcher *currentWatching, entry *core.Entry, line string) error {
+func (watcher *WatcherProcess) handleParseJSON(fileWatcher *currentWatching, entry *core.Entry, line string) error {
 	jsonData := map[string]interface{}{}
 	if err := json.Unmarshal([]byte(line), &jsonData); err != nil {
 		return fmt.Errorf("unable to parse line as json: %s", err)
@@ -306,7 +311,7 @@ func (watcher *Watcher) handleParseJSON(fileWatcher *currentWatching, entry *cor
 	return nil
 }
 
-func (watcher *Watcher) extractDate(fileWatcher *currentWatching, entry *core.Entry) error {
+func (watcher *WatcherProcess) extractDate(fileWatcher *currentWatching, entry *core.Entry) error {
 	// date extraction
 	if fileWatcher.parser.DateExtract.Field != "" {
 		// search for date field

@@ -22,7 +22,7 @@ const (
 	emitterEndpoint = "http://%s:%d/v1/entries"
 )
 
-type Emitter struct {
+type EmitterProcess struct {
 	pendingMutex  sync.Mutex
 	isFlushing    sync.Mutex
 	exitChan      chan bool
@@ -32,7 +32,11 @@ type Emitter struct {
 	postEntryURL string
 }
 
-func (emitter *Emitter) Run() error {
+func (emitter *EmitterProcess) Name() string {
+	return emitterLogPrefix
+}
+
+func (emitter *EmitterProcess) Run() error {
 	emitter.exitChan = make(chan bool)
 
 	// subscribe events
@@ -68,11 +72,11 @@ func (emitter *Emitter) Run() error {
 	return nil
 }
 
-func (emitter *Emitter) HandleStop() {
+func (emitter *EmitterProcess) HandleStop() {
 	emitter.exitChan <- true
 }
 
-func (emitter *Emitter) addEntry(entry *core.Entry) {
+func (emitter *EmitterProcess) addEntry(entry *core.Entry) {
 	go func() {
 		core.Logger.Debugf(emitterLogPrefix, "Add log to pool")
 
@@ -84,7 +88,7 @@ func (emitter *Emitter) addEntry(entry *core.Entry) {
 	}()
 }
 
-func (emitter *Emitter) cleanupBuffer(withMutexlock bool) {
+func (emitter *EmitterProcess) cleanupBuffer(withMutexlock bool) {
 	if int64(len(emitter.entriesBuffer)) <= emitterMaxEntriesToKeepInBuffer {
 		return
 	}
@@ -99,7 +103,7 @@ func (emitter *Emitter) cleanupBuffer(withMutexlock bool) {
 	}
 }
 
-func (emitter *Emitter) flush() {
+func (emitter *EmitterProcess) flush() {
 	if len(emitter.entriesBuffer) == 0 {
 		return
 	}

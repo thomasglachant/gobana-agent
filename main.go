@@ -42,9 +42,28 @@ func main() {
 	// setup embedded fs to core
 	core.TemplateFs = templateFs
 	core.AssetFs = assetFs
+	// setup vars
 	core.Logger.DebugEnabled = agent.AppConfig.Debug
 	agent.AppVersion = version
 
-	// start app
-	agent.StartAgent(configFile)
+	// parse config
+	core.Logger.Infof("config", "load config from %s", configFile)
+	if err := core.ReadConfig(configFile, agent.AppConfig); err != nil {
+		core.Logger.Criticalf("config", "unable to load agent config : %s", err)
+	}
+
+	// start processes
+	agent.Alerter = &agent.AlerterProcess{}
+	agent.Watcher = &agent.WatcherProcess{}
+	processes := []core.ProcessInterface{
+		&core.ProcessStruct{RunningProcess: agent.Watcher},
+		&core.ProcessStruct{RunningProcess: agent.Alerter},
+	}
+
+	if agent.AppConfig.Emitter.Enabled {
+		agent.Emitter = &agent.EmitterProcess{}
+		processes = append(processes, &core.ProcessStruct{RunningProcess: agent.Emitter})
+	}
+
+	core.RunProcesses(processes)
 }

@@ -3,7 +3,6 @@ package core
 import (
 	"os"
 	"os/signal"
-	"reflect"
 	"syscall"
 	"time"
 )
@@ -17,10 +16,11 @@ type ProcessInterface interface {
 	Start()
 	Stop()
 	IsRunning() bool
-	GetName() string
+	Name() string
 }
 
 type RunningProcessInterface interface {
+	Name() string
 	Run() error
 	HandleStop()
 }
@@ -34,14 +34,14 @@ type ProcessStruct struct {
 }
 
 func (process *ProcessStruct) Start() {
-	Logger.Infof(logPrefix, "Starting process %s", process.GetName())
+	Logger.Infof(logPrefix, "Starting process %s", process.Name())
 	process.isRunning = true
 
 	if err := process.RunningProcess.Run(); err != nil {
-		Logger.Errorf(logPrefix, "Fatal error for process %s : %s", process.GetName(), err)
+		Logger.Errorf(logPrefix, "Fatal error for process %s : %s", process.Name(), err)
 	}
 
-	Logger.Infof(logPrefix, "Shutting down process %s", process.GetName())
+	Logger.Infof(logPrefix, "Shutting down process %s", process.Name())
 	process.isRunning = false
 }
 
@@ -55,8 +55,8 @@ func (process *ProcessStruct) IsRunning() bool {
 	return process.isRunning
 }
 
-func (process *ProcessStruct) GetName() string {
-	return reflect.Indirect(reflect.ValueOf(process.RunningProcess)).Type().String()
+func (process *ProcessStruct) Name() string {
+	return process.RunningProcess.Name()
 }
 
 func ProcessInfiniteLoop(delay time.Duration, exitChan chan bool, handler func()) {
@@ -110,7 +110,7 @@ func RunProcesses(processes []ProcessInterface) {
 		go func(process ProcessInterface) {
 			defer func() {
 				if r := recover(); r != nil {
-					Logger.Criticalf(process.GetName(), "Panic occurred : %v", r)
+					Logger.Criticalf(process.Name(), "Panic occurred : %v", r)
 				}
 			}()
 			process.Start()

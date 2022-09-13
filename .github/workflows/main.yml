@@ -24,7 +24,7 @@ jobs:
             go mod tidy
             git diff --exit-code go.mod
 
-      - name: Build agent
+      - name: Build
         run: make build
 
       - name: Test fmt

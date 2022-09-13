@@ -10,7 +10,7 @@ import (
 )
 
 type ParserConfigStruct struct {
-	Name          string            `yaml:"name" validate:"required,regular_name"`
+	Name          string            `yaml:"name" validate:"required,simple_name"`
 	Mode          string            `yaml:"mode" validate:"required,oneof=json regex"`
 	RegexPattern  string            `yaml:"regex_pattern" validate:"required_if=Mode regex"`
 	JSONFields    map[string]string `yaml:"json_fields" validate:"required_if=Mode json,dive,required"`
@@ -34,7 +34,7 @@ type TriggerValueConfigStruct struct {
 }
 
 type TriggerConfigStruct struct {
-	Name   string                     `yaml:"name" validate:"required,regular_name"`
+	Name   string                     `yaml:"name" validate:"required,simple_name"`
 	Values []TriggerValueConfigStruct `yaml:"values" validate:"required_if=Kind Values,dive,required"`
 }
 
@@ -45,18 +45,19 @@ type AlertConfigStruct struct {
 }
 
 type EmitterConfigStruct struct {
-	Enabled    bool   `yaml:"enabled" default:"false"`
-	Server     string `yaml:"server" validate:"required_if=Enabled true"`
-	Port       int64  `yaml:"port" validate:"required_if=Enabled true,min=1,max=65535" default:"59302"`
-	Secret     string `yaml:"secret" validate:"required_if=Enabled true" default:"myawesomesecret"`
-	Frequency  int64  `yaml:"frequency" validate:"required_if=Enabled true,min=1,max=3600" default:"5"`
-	Timeout    int64  `yaml:"timeout" validate:"required_if=Enabled true,min=1,max=60" default:"10"`
-	BufferSize int64  `yaml:"buffer_size" validate:"required_if=Enabled true,min=1,max=1000000" default:"10000"`
+	Enabled     bool   `yaml:"enabled" default:"false"`
+	Server      string `yaml:"server" validate:"required_if=Enabled true"`
+	Port        int64  `yaml:"port" validate:"required_if=Enabled true,min=1,max=65535" default:"59302"`
+	Secret      string `yaml:"secret" validate:"required_if=Enabled true" default:"myawesomesecret"`
+	Frequency   int64  `yaml:"frequency" validate:"required_if=Enabled true,min=1,max=3600" default:"5"`
+	Timeout     int64  `yaml:"timeout" validate:"required_if=Enabled true,min=1,max=60" default:"10"`
+	BufferSize  int64  `yaml:"buffer_size" validate:"required_if=Enabled true,min=1,max=1000000" default:"10000"`
+	WorkspaceID string `yaml:"workspace" validate:"required_if=Enabled true,slug"`
 }
 
 type AgentConfig struct {
 	Debug       bool                  `yaml:"debug" default:"false"`
-	Application string                `yaml:"application" validate:"required,regular_name"`
+	Application string                `yaml:"application" validate:"required,simple_name"`
 	Server      string                `yaml:"server"`
 	Parsers     []*ParserConfigStruct `yaml:"parsers" validate:"required,gte=1,unique=Name,dive"`
 	Alerts      AlertConfigStruct     `yaml:"alerts" validate:""`
@@ -75,16 +76,9 @@ func (s *AgentConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func CheckConfig(configFile string) {
 	if err := core.ReadConfig(configFile, AppConfig); err != nil {
-		fmt.Printf("Invalid AppConfig file : %s\n", err)
+		fmt.Printf("Invalid config file : %s\n", err)
 		os.Exit(1)
 	}
 	fmt.Printf("Config file is valid\n")
 	os.Exit(0)
-}
-
-func LoadConfig(configFile string) {
-	core.Logger.Infof(logPrefix, "load AppConfig from %s", configFile)
-	if err := core.ReadConfig(configFile, AppConfig); err != nil {
-		core.Logger.Criticalf(logPrefix, "unable to load agent AppConfig : %s", err)
-	}
 }
