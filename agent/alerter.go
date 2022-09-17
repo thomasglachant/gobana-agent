@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"spooter-agent/core"
+	"gobana-agent/core"
 )
 
 const (
@@ -36,7 +36,7 @@ type Alert struct {
 type Alerts []*Alert
 
 func (alerts Alerts) Subject() string {
-	return fmt.Sprintf("%d new alert(s)", len(alerts))
+	return fmt.Sprintf("%s - %d new alert(s)", AppConfig.Application, len(alerts))
 }
 
 func (alerts Alerts) TemplateName() string {
@@ -144,7 +144,7 @@ func HandleParserTrigger(entryObj interface{}) {
 			}
 
 			if allFieldsMatch {
-				core.Logger.Infof(alerterLogPrefix, "Line match with trigger \"%s\"", trigger.Name)
+				core.Logger.Debugf(alerterLogPrefix, "Line match with trigger \"%s\"", trigger.Name)
 				Alerter.addAlert(&Alert{
 					Date:        time.Now(),
 					Application: AppConfig.Application,

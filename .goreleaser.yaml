@@ -2,8 +2,8 @@ before:
     hooks:
         - go mod tidy
 builds:
-    -   id: "spooter-agent"
-        binary: "spooter-agent"
+    -   id: "gobana-agent"
+        binary: "gobana-agent"
         env:
             - CGO_ENABLED=0
             - GO111MODULE=on
@@ -29,10 +29,10 @@ checksum:
 
 nfpms:
     - id: agent
-      package_name: spooter-agent
+      package_name: gobana-agent
       
       vendor: thomasglachant
-      homepage: https://github.com/thomasglachant/spooter-agent
+      homepage: https://github.com/thomasglachant/gobana-agent
       maintainer: Thomas Glachant <thomas@glth.fr>
       
       formats:
@@ -40,10 +40,10 @@ nfpms:
       
       bindir: /usr/bin
       contents:
-          - src: ./resources/dist/init/spooter-agent.service
-            dst: /lib/systemd/system/spooter-agent.service
-          - src: ./resources/dist/config/spooter_agent.yaml
-            dst: /etc/spooter/agent.yaml
+          - src: ./resources/dist/init/gobana-agent.service
+            dst: /lib/systemd/system/gobana-agent.service
+          - src: ./resources/dist/config/gobana_agent.yaml
+            dst: /etc/gobana/agent.yaml
             type: config
       
       scripts:
@@ -57,7 +57,7 @@ snapshot:
 release:
     github:
         owner: thomasglachant
-        name: spooter-agent
+        name: gobana-agent
     prerelease: auto
 
 changelog:

@@ -1,4 +1,4 @@
-module spooter-agent
+module gobana-agent
 
 go 1.19
 

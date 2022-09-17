@@ -1,0 +1,25 @@
+# gobana-agent.service
+
+[Unit]
+Description=Gobana Agent
+Documentation=https://github.com/thomasglachant/gobana-agent
+After=network.target
+
+[Service]
+Type=simple
+User=gobana
+Group=gobana
+ExecStart=/usr/bin/gobana-agent -config /etc/gobana/agent.yaml
+TimeoutStopSec=30s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+Restart=on-failure
+RestartSec=5s
+
+StandardOutput=append:/var/log/gobana/agent.log
+StandardError=append:/var/log/gobana/agent.log
+
+[Install]
+WantedBy=multi-user.target

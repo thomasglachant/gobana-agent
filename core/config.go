@@ -15,8 +15,8 @@ type SMTPConfig struct {
 	Username   string `yaml:"username"`
 	Password   string `yaml:"password"`
 	SSLEnabled bool   `yaml:"ssl_enabled" default:"false"`
-	FromName   string `yaml:"from_name" validate:"required" default:"Spooter"`
-	FromEmail  string `yaml:"from_email" validate:"required,email" default:"spooter@localhost"`
+	FromName   string `yaml:"from_name" validate:"required" default:"Gobana"`
+	FromEmail  string `yaml:"from_email" validate:"required,email" default:"gobana@localhost"`
 }
 
 func ReadConfig(filename string, config interface{}) error {

@@ -141,7 +141,7 @@ smtp:
     # ssl_enabled: false
     
     ## Email of the email sender (required)
-    # from_email: "spooter@localhost" 
+    # from_email: "gobana@localhost" 
     
     ## Name of the email sender (required)
-    # from_name: "Spooter" 
+    # from_name: "Gobana" 

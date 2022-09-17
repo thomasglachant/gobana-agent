@@ -1,5 +1,5 @@
-APPNAME  = spooter-agent
-PACKAGE  = github.com/thomasglachant/spooter-agent
+APPNAME  = gobana-agent
+PACKAGE  = github.com/thomasglachant/gobana-agent
 DATE    ?= $(shell date +%FT%T%z)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat $(CURDIR)/.version 2> /dev/null || echo v0)

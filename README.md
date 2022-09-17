@@ -1,23 +1,23 @@
-# Spooter
+# Gobana
 
-Spooter is a simple, fast, and powerful log monitoring tool.
+Gobana is a simple, fast, and powerful log monitoring tool.
 
 You can use agent only to monitor log files and configure alerting,
 or you can use agent + server to centralize log monitoring.
 
 ## Agent mode
 
-First, you must create a configuration file `config_agent.yml`.
+First, you must create a configuration file `config.yml`.
 
-Create your own config file using [agent configuration file template](resources/dist/config/spooter_agent.yaml)
+Create your own config file using [agent configuration file template](resources/dist/config/gobana_agent.yaml)
 
-Next, run `spooter-agent` using:
+Next, run `gobana-agent` using:
 
 ```bash
 ################
 #   Makefile   #
 ################
-make start config=config_agent.yaml
+make start config=config.yaml
 
 ################
 # Command line #
@@ -25,7 +25,7 @@ make start config=config_agent.yaml
 # Build
 make build
 # Run
-./bin/spooter-agent -config=config_agent.yaml
+./bin/gobana-agent -config=config.yaml
 ```
 
 ## Test

@@ -18,7 +18,7 @@
 .DS_Store
 
 # exec
-bin/spooter-agent
+bin/gobana-agent
 !bin/.gitkeep
 
 # log
@@ -37,4 +37,5 @@ env/*
 var/*
 !var/.gitkeep
 
-config_agent.yaml
+config.yaml
+config.yml

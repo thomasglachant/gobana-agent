@@ -8,11 +8,11 @@ linters-settings:
                     - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
                     - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
                     - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-                    - (spooter-agent/core.LogInterface).Criticalf
-                    - (spooter-agent/core.LogInterface).Infof
-                    - (spooter-agent/core.LogInterface).Errorf
-                    - (spooter-agent/core.LogInterface).Noticef
-                    - (spooter-agent/core.LogInterface).Debugf
+                    - (gobana-agent/core.LogInterface).Criticalf
+                    - (gobana-agent/core.LogInterface).Infof
+                    - (gobana-agent/core.LogInterface).Errorf
+                    - (gobana-agent/core.LogInterface).Noticef
+                    - (gobana-agent/core.LogInterface).Debugf
     gocyclo:
         min-complexity: 15
     dupl:
@@ -21,7 +21,7 @@ linters-settings:
         lines: 100
         statements: 50
     gci:
-        local-prefixes: spooter-agent
+        local-prefixes: gobana-agent
     goconst:
         min-len: 3
         min-occurrences: 7
@@ -38,7 +38,7 @@ linters-settings:
     lll:
         line-length: 140
     goimports:
-        local-prefixes: spooter-agent
+        local-prefixes: gobana-agent
     gocritic:
         enabled-tags:
             - diagnostic

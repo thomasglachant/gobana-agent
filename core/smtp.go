@@ -27,9 +27,6 @@ func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]i
 		fmt.Sprintf("templates/email/%s.gohtml", template),
 		"templates/email/_layout.gohtml",
 	}, vars))
-	if imgLogo, imgErr := AssetAsReader("assets/email/spooter-light.png"); imgErr == nil {
-		m.EmbedReader("logo.png", imgLogo)
-	}
 	d := gomail.NewDialer(smtp.Host, smtp.Port, smtp.Username, smtp.Password)
 	d.TLSConfig = &tls.Config{
 		ServerName:         smtp.Host,
