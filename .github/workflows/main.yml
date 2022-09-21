@@ -28,10 +28,12 @@ jobs:
         run: make build
 
       - name: Test fmt
-        run: make fmt
+        run: |
+            make fmt
+            git diff --exit-code
 
       - name: Test linter
         run: make lint
 
       - name: Tests unit
-        run: make test
+        run: make test-unit

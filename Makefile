@@ -52,11 +52,10 @@ clean: ; $(info $(M) cleaning…)	@ ## Cleanup everything
 	@rm -rf test/tests.* test/coverage.*
 
 .PHONY: test
-test: fmt lint build test-unit ## Run tests
+test: lint build test-unit ## Run tests
 
 .PHONY: test-unit
-test-unit:  ## Run tests
-	$(info $(M) run tests…)
+test-unit: ; $(info $(M) run tests…)  ## Run tests
 	$(GO) test -v ./...
 
 .PHONY: help
