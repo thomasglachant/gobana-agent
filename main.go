@@ -4,15 +4,18 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"os"
+
 	"gobana-agent/agent"
 	"gobana-agent/core"
-	"os"
 )
 
 const AppName = "gobana-agent"
 
-var Version = "?"
-var Date = "-"
+var (
+	Version = "?"
+	Date    = "-"
+)
 
 // Filesystem which contains templates
 //
