@@ -4,11 +4,14 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"gobana-agent/agent"
 	"gobana-agent/core"
 )
+
+const APP_NAME = "gobana-agent"
 
 // Filesystem which contains templates
 //
@@ -20,13 +23,22 @@ var version = "?"
 var date = time.Now().Format("2006-01-02")
 
 func main() {
-	fmt.Printf("# gobana-agent v%s (%s)\n", version, date)
-
 	var configFile string
 	var checkConfig bool
+	var showVersion bool
 	flag.StringVar(&configFile, "config", "config.yaml", "Path to config file")
 	flag.BoolVar(&checkConfig, "check-config", false, "Check config file is valid")
+	flag.BoolVar(&showVersion, "version", false, "Show version number")
 	flag.Parse()
+
+	// version
+	if showVersion {
+		fmt.Printf("%s v%s (%s)\n", APP_NAME, version, date)
+		os.Exit(0)
+	}
+
+	core.Logger.Infof("app", "Start %s (v%s)", APP_NAME, version)
+	defer core.Logger.Infof("app", "Exit %s", APP_NAME)
 
 	//
 	// check config special case
