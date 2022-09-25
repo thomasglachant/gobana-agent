@@ -10,11 +10,11 @@ import (
 	"gobana-agent/core"
 )
 
-const AppName = "gobana-agent"
+const AppName = "Gobana Agent"
 
 var (
 	version = "?"
-	date    = "-"
+	commit  = "-"
 )
 
 // Filesystem which contains templates
@@ -33,7 +33,7 @@ func main() {
 
 	// Version
 	if showVersion {
-		fmt.Printf("%s version %s (build at %s)\n", AppName, version, date)
+		fmt.Printf("%s version %s, build %s\n", AppName, version, commit)
 		os.Exit(0)
 	}
 
