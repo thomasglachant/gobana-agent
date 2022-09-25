@@ -11,7 +11,7 @@ import (
 	"gobana-agent/core"
 )
 
-const APP_NAME = "gobana-agent"
+const AppName = "gobana-agent"
 
 // Filesystem which contains templates
 //
@@ -33,12 +33,12 @@ func main() {
 
 	// version
 	if showVersion {
-		fmt.Printf("%s v%s (%s)\n", APP_NAME, version, date)
+		fmt.Printf("%s v%s (%s)\n", AppName, version, date)
 		os.Exit(0)
 	}
 
-	core.Logger.Infof("app", "Start %s (v%s)", APP_NAME, version)
-	defer core.Logger.Infof("app", "Exit %s", APP_NAME)
+	core.Logger.Infof("app", "Start %s (v%s)", AppName, version)
+	defer core.Logger.Infof("app", "Exit %s", AppName)
 
 	//
 	// check config special case

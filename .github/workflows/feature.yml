@@ -1,11 +1,8 @@
-name: Main branch
-
-concurrency: 'main_environment'
+name: Pull request
 
 on:
-    push:
-        branches:
-            - main
+    pull_request:
+        types: [ synchronize, opened, reopened, ready_for_review ]
 
 jobs:
     test:
