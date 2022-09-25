@@ -4,23 +4,20 @@ import (
 	"embed"
 	"flag"
 	"fmt"
-	"os"
-	"time"
-
 	"gobana-agent/agent"
 	"gobana-agent/core"
+	"os"
 )
 
 const AppName = "gobana-agent"
+
+var Version = "?"
+var Date = "-"
 
 // Filesystem which contains templates
 //
 //go:embed templates/**/*
 var templateFs embed.FS
-
-// auto-generated during build
-var version = "?"
-var date = time.Now().Format("2006-01-02")
 
 func main() {
 	var configFile string
@@ -28,16 +25,16 @@ func main() {
 	var showVersion bool
 	flag.StringVar(&configFile, "config", "config.yaml", "Path to config file")
 	flag.BoolVar(&checkConfig, "check-config", false, "Check config file is valid")
-	flag.BoolVar(&showVersion, "version", false, "Show version number")
+	flag.BoolVar(&showVersion, "version", false, "Show Version number")
 	flag.Parse()
 
-	// version
+	// Version
 	if showVersion {
-		fmt.Printf("%s v%s (%s)\n", AppName, version, date)
+		fmt.Printf("%s %s (%s)\n", AppName, Version, Date)
 		os.Exit(0)
 	}
 
-	core.Logger.Infof("app", "Start %s (v%s)", AppName, version)
+	core.Logger.Infof("app", "Start %s (%s)", AppName, Version)
 	defer core.Logger.Infof("app", "Exit %s", AppName)
 
 	//
@@ -50,7 +47,7 @@ func main() {
 	core.TemplateFs = templateFs
 	// setup vars
 	core.Logger.DebugEnabled = agent.AppConfig.Debug
-	agent.AppVersion = version
+	agent.AppVersion = Version
 
 	// parse config
 	core.Logger.Infof("config", "load config from %s", configFile)

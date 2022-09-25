@@ -22,7 +22,7 @@ Y = $(shell printf "\033[33;1m▶\033[0m")
 build: $(BASE) ; $(info $(M) building executable…) @ ## Build program binary (without checking lint and format)
 	$Q cd $(BASE) && $(GO) build \
 		-tags release \
-		-ldflags "-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)" \
+		-ldflags "-X main.Version=$(VERSION) -X main.Date=$(DATE)" \
 		-o $(BIN)/$(APPNAME) main.go
 
 .PHONY: start

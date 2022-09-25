@@ -15,8 +15,6 @@ builds:
             - arm64
         flags:
             - -trimpath
-        ldflags:
-            - -s -w    
 archives:
     -   replacements:
             linux: Linux
