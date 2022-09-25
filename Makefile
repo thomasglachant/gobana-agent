@@ -8,6 +8,10 @@ BIN      = $(CURDIR)/bin
 GOPATH   = $(CURDIR)/.gopath~
 BASE     = $(CURDIR)
 
+NEXT_VERSION_MINOR=$(shell bin/semver.sh "minor")
+NEXT_VERSION_MAJOR=$(shell bin/semver.sh "major")
+NEXT_VERSION_PATCH=$(shell bin/semver.sh "patch")
+
 GO      = GO111MODULE=on go
 GOFMT   = $(shell go env GOPATH)/bin/gofumpt
 GOLINT  = $(shell go env GOPATH)/bin/golangci-lint
