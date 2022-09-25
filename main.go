@@ -13,8 +13,8 @@ import (
 const AppName = "gobana-agent"
 
 var (
-	Version = "?"
-	Date    = "-"
+	version = "?"
+	date    = "-"
 )
 
 // Filesystem which contains templates
@@ -33,11 +33,11 @@ func main() {
 
 	// Version
 	if showVersion {
-		fmt.Printf("%s %s (%s)\n", AppName, Version, Date)
+		fmt.Printf("%s version %s (build at %s)\n", AppName, version, date)
 		os.Exit(0)
 	}
 
-	core.Logger.Infof("app", "Start %s (%s)", AppName, Version)
+	core.Logger.Infof("app", "Start %s version %s", AppName, version)
 	defer core.Logger.Infof("app", "Exit %s", AppName)
 
 	//
@@ -50,7 +50,7 @@ func main() {
 	core.TemplateFs = templateFs
 	// setup vars
 	core.Logger.DebugEnabled = agent.AppConfig.Debug
-	agent.AppVersion = Version
+	agent.AppVersion = version
 
 	// parse config
 	core.Logger.Infof("config", "load config from %s", configFile)

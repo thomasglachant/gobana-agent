@@ -1,6 +1,7 @@
 APPNAME  = gobana-agent
 PACKAGE  = github.com/thomasglachant/gobana-agent
 DATE    ?= $(shell date +%FT%T%z)
+COMMIT  ?= $(shell git rev-parse --short HEAD)
 VERSION ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat $(CURDIR)/.version 2> /dev/null || echo v0)
 BIN      = $(CURDIR)/bin
@@ -22,7 +23,7 @@ Y = $(shell printf "\033[33;1m▶\033[0m")
 build: $(BASE) ; $(info $(M) building executable…) @ ## Build program binary (without checking lint and format)
 	$Q cd $(BASE) && $(GO) build \
 		-tags release \
-		-ldflags "-X main.Version=$(VERSION) -X main.Date=$(DATE)" \
+		-ldflags "-X main.version=$(VERSION) -X main.date=$(DATE) -X main.commit=$(COMMIT)" \
 		-o $(BIN)/$(APPNAME) main.go
 
 .PHONY: start
