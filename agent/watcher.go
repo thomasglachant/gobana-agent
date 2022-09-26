@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hpcloud/tail"
+	"github.com/nxadm/tail"
 
 	"gobana-agent/core"
 )
