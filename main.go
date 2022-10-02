@@ -46,17 +46,17 @@ func main() {
 		agent.CheckConfig(configFile)
 	}
 
-	// setup embedded fs to core
-	core.TemplateFs = templateFs
-	// setup vars
-	core.Logger.DebugEnabled = agent.AppConfig.Debug
-	agent.AppVersion = version
-
 	// parse config
 	core.Logger.Infof("config", "load config from %s", configFile)
 	if err := core.ReadConfig(configFile, agent.AppConfig); err != nil {
 		core.Logger.Criticalf("config", "unable to load agent config : %s", err)
 	}
+
+	// setup embedded fs to core
+	core.TemplateFs = templateFs
+	// setup vars
+	core.Logger.DebugEnabled = agent.AppConfig.Debug
+	agent.AppVersion = version
 
 	// start processes
 	agent.Alerter = &agent.AlerterProcess{}

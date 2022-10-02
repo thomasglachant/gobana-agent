@@ -40,7 +40,7 @@ type TriggerConfigStruct struct {
 
 type AlertConfigStruct struct {
 	Frequency  int64                   `yaml:"frequency" validate:"required,gt=0" default:"5"`
-	Recipients []RecipientConfigStruct `yaml:"recipients" validate:"required,gt=0,dive"`
+	Recipients []RecipientConfigStruct `yaml:"recipients" validate:"dive"`
 	Triggers   []TriggerConfigStruct   `yaml:"triggers" validate:"dive"`
 }
 
