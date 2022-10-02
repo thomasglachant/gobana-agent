@@ -149,22 +149,24 @@ func (watcher *WatcherProcess) startWatchFile(parser *ParserConfigStruct, file s
 	watcher.mu.Unlock()
 
 	for line := range t.Lines {
-		core.Logger.Debugf(watcherLogPrefix, "Receive Line: %s", line.Text)
+		go func(l *tail.Line) {
+			core.Logger.Debugf(watcherLogPrefix, "Receive line (num: %d): %s", l.Num, l.Text)
 
-		var entry *core.Entry
-		var err error
-		entry, err = watcher.handleLine(cur, line.Text)
-		if err != nil {
-			core.Logger.Errorf(watcherLogPrefix, "Error while handle line: %s", err)
-			continue
-		}
+			var entry *core.Entry
+			var err error
+			entry, err = watcher.handleLine(cur, l)
+			if err != nil {
+				core.Logger.Errorf(watcherLogPrefix, "Error while handle line: %s", err)
+				return
+			}
 
-		core.Logger.Debugf(watcherLogPrefix, "Line handled")
-		for k, v := range entry.Fields {
-			core.Logger.Debugf(watcherLogPrefix, "Field %s: %s", k, v)
-		}
+			core.Logger.Debugf(watcherLogPrefix, "Line handled")
+			for k, v := range entry.Fields {
+				core.Logger.Debugf(watcherLogPrefix, "Field %s: %s", k, v)
+			}
 
-		core.EventDispatcher.Dispatch(&EntryDiscoverEvent{Entry: entry})
+			core.EventDispatcher.Dispatch(&EntryDiscoverEvent{Entry: entry})
+		}(line)
 	}
 
 	watcher.mu.Lock()
@@ -187,7 +189,7 @@ func (watcher *WatcherProcess) endWatchFromTailKey(tailKey string) {
 	watcher.mu.Unlock()
 }
 
-func (watcher *WatcherProcess) handleLine(fileWatcher *currentWatching, line string) (*core.Entry, error) {
+func (watcher *WatcherProcess) handleLine(fileWatcher *currentWatching, line *tail.Line) (*core.Entry, error) {
 	// default values
 	entry := &core.Entry{
 		Metadata: core.EntryMetadata{
@@ -197,21 +199,21 @@ func (watcher *WatcherProcess) handleLine(fileWatcher *currentWatching, line str
 			Server:       AppConfig.Server,
 			Filename:     fileWatcher.fileName,
 			Parser:       fileWatcher.parser.Name,
-			CaptureDate:  time.Now(),
+			CaptureDate:  line.Time,
 		},
 		Date:   time.Now(),
-		Raw:    line,
+		Raw:    line.Text,
 		Fields: map[string]string{},
 	}
 
 	// parse log line
 	switch {
 	case fileWatcher.parser.Mode == parserModeRegex:
-		if err := watcher.handleParseRegex(fileWatcher, entry, line); err != nil {
+		if err := watcher.handleParseRegex(fileWatcher, entry, line.Text); err != nil {
 			return nil, fmt.Errorf("error while handle regex: %s", err)
 		}
 	case fileWatcher.parser.Mode == parserModeJSON:
-		if err := watcher.handleParseJSON(fileWatcher, entry, line); err != nil {
+		if err := watcher.handleParseJSON(fileWatcher, entry, line.Text); err != nil {
 			return nil, fmt.Errorf("error while handle json: %s", err)
 		}
 	default:
