@@ -56,6 +56,11 @@ clean: ; $(info $(M) cleaning…)	@ ## Cleanup everything
 	@find bin ! -name '.gitkeep' -type f -exec rm -f {} +
 	@rm -rf test/tests.* test/coverage.*
 
+.PHONY: upgrade-dependencies
+upgrade-dependencies: ; $(info $(M) upgrading dependencies…)
+	$Q GOPATH=$(shell go env GOPATH) go get -u
+	$Q GOPATH=$(shell go env GOPATH) go mod tidy
+
 ##
 ## test
 .PHONY: test
