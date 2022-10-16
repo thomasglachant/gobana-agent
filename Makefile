@@ -74,17 +74,17 @@ test-unit: ; $(info $(M) run tests…)  ## Run tests
 ## repository management
 .PHONY: tag-version-minor
 tag-version-minor: ; $(info $(M) Tag version…) @
-	@echo "Create tag $(NEXT_VERSION_MINOR)? [y/N] " && read ans && [ $${ans:-N} == y ]
+	@read -p "Create tag $(NEXT_VERSION_MINOR)? [y/N] " ans && [ $${ans:-N} == y ]
 	$Q git tag $(NEXT_VERSION_MINOR) && git push origin $(NEXT_VERSION_MINOR)
 
 .PHONY: tag-version-major
 tag-version-major: ; $(info $(M) Tag version…) @
-	@echo "Create tag $(NEXT_VERSION_MAJOR)? [y/N] " && read ans && [ $${ans:-N} == y ]
+	@read -p "Create tag $(NEXT_VERSION_MAJOR)? [y/N] " ans && [ $${ans:-N} == y ]
 	$Q git tag $(NEXT_VERSION_MAJOR) && git push origin $(NEXT_VERSION_MAJOR)
 
 .PHONY: tag-version-patch
 tag-version-patch: ; $(info $(M) Tag version…) @
-	@echo "Create tag $(NEXT_VERSION_PATCH)? [y/N] " && read ans && [ $${ans:-N} == y ]
+	@read -p "Create tag $(NEXT_VERSION_PATCH)? [y/N] " ans && [ $${ans:-N} == y ]
 	$Q git tag $(NEXT_VERSION_PATCH) && git push origin $(NEXT_VERSION_PATCH)
 
 .PHONY: help
