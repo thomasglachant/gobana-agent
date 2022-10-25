@@ -1,6 +1,7 @@
 before:
     hooks:
         - go mod tidy
+        
 builds:
     -   id: "gobana-agent"
         binary: "gobana-agent"
@@ -15,6 +16,7 @@ builds:
             - arm64
         flags:
             - -trimpath
+            
 archives:
     -   replacements:
             linux: Linux
