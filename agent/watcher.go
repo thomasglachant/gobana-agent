@@ -92,11 +92,11 @@ func (watcher *WatcherProcess) discoverFilesToWatch() error {
 	for _, parser := range AppConfig.Parsers {
 		includedFiles, err := core.GetFilesMatchingPatterns(parser.FilesIncluded)
 		if err != nil {
-			return fmt.Errorf("error while retrieve included files %s: %s", parser.FilesIncluded, err)
+			return fmt.Errorf("error while retrieve included files %s: %w", parser.FilesIncluded, err)
 		}
 		excludedFiles, err := core.GetFilesMatchingPatterns(parser.FilesExcluded)
 		if err != nil {
-			return fmt.Errorf("error while retrieve excluded files %s: %s", parser.FilesIncluded, err)
+			return fmt.Errorf("error while retrieve excluded files %s: %w", parser.FilesIncluded, err)
 		}
 
 		for _, file := range includedFiles {
@@ -156,7 +156,7 @@ func (watcher *WatcherProcess) startWatchFile(parser *ParserConfigStruct, file s
 			var err error
 			entry, err = watcher.handleLine(cur, l)
 			if err != nil {
-				core.Logger.Errorf(watcherLogPrefix, "Error while handle line: %s", err)
+				core.Logger.Errorf(watcherLogPrefix, "Error while handle line with parser \"%s\": %s", parser.Name, err)
 				return
 			}
 
@@ -210,11 +210,11 @@ func (watcher *WatcherProcess) handleLine(fileWatcher *currentWatching, line *ta
 	switch {
 	case fileWatcher.parser.Mode == parserModeRegex:
 		if err := watcher.handleParseRegex(fileWatcher, entry, line.Text); err != nil {
-			return nil, fmt.Errorf("error while handle regex: %s", err)
+			return nil, fmt.Errorf("error while handle regex: %w", err)
 		}
 	case fileWatcher.parser.Mode == parserModeJSON:
 		if err := watcher.handleParseJSON(fileWatcher, entry, line.Text); err != nil {
-			return nil, fmt.Errorf("error while handle json: %s", err)
+			return nil, fmt.Errorf("error while handle json: %w", err)
 		}
 	default:
 		return nil, fmt.Errorf("unknown mode %s", fileWatcher.parser.Mode)
@@ -222,7 +222,7 @@ func (watcher *WatcherProcess) handleLine(fileWatcher *currentWatching, line *ta
 
 	// extract date from entry
 	if err := watcher.extractDate(fileWatcher, entry); err != nil {
-		return nil, fmt.Errorf("error while extract date: %s", err)
+		return nil, fmt.Errorf("error while extract date: %w", err)
 	}
 
 	return entry, nil
@@ -261,7 +261,7 @@ func (watcher *WatcherProcess) handleParseRegex(fileWatcher *currentWatching, en
 func (watcher *WatcherProcess) handleParseJSON(fileWatcher *currentWatching, entry *core.Entry, line string) error {
 	jsonData := map[string]interface{}{}
 	if err := json.Unmarshal([]byte(line), &jsonData); err != nil {
-		return fmt.Errorf("unable to parse line as json: %s", err)
+		return fmt.Errorf("unable to parse line as json: %w (line: %s)", err, line)
 	}
 	for internalFieldName, jsonField := range fileWatcher.parser.JSONFields {
 		// json field contain "." => use json path
@@ -321,7 +321,7 @@ func (watcher *WatcherProcess) extractDate(fileWatcher *currentWatching, entry *
 			// date field found
 			date, err := time.Parse(fileWatcher.parser.DateExtract.Format, entry.Fields[fileWatcher.parser.DateExtract.Field])
 			if err != nil {
-				core.Logger.Errorf(watcherLogPrefix, "Error while parsing date: %s", err)
+				core.Logger.Errorf(watcherLogPrefix, "Error while parsing date \"%s\": %s", entry.Fields[fileWatcher.parser.DateExtract.Field], err)
 				return err
 			}
 			entry.Date = date

@@ -34,7 +34,7 @@ func SendEmail(smtp *SMTPConfig, to, subject, template string, vars map[string]i
 	}
 
 	if err := d.DialAndSend(m); err != nil {
-		return fmt.Errorf("unable to send email : %s", err)
+		return fmt.Errorf("unable to send email : %w", err)
 	}
 
 	return nil

@@ -22,17 +22,17 @@ func EncryptMessage(data any, key string) ([]byte, error) {
 	var buf bytes.Buffer
 	gzipWriter := gzip.NewWriter(&buf)
 	if _, err := gzipWriter.Write(message); err != nil {
-		return nil, fmt.Errorf("error compressing message: %s", err)
+		return nil, fmt.Errorf("error compressing message: %w", err)
 	}
 	err := gzipWriter.Close()
 	if err != nil {
-		return nil, fmt.Errorf("error closing compress message: %s", err)
+		return nil, fmt.Errorf("error closing compress message: %w", err)
 	}
 
 	// encrypt message
 	encryptedData, err := AESEncrypt(buf.Bytes(), key)
 	if err != nil {
-		return nil, fmt.Errorf("error encrypting data: %s", err)
+		return nil, fmt.Errorf("error encrypting data: %w", err)
 	}
 
 	return encryptedData, nil
@@ -44,7 +44,7 @@ func DecryptMessage(data []byte, key string, obj any) error {
 	var err error
 	decryptedBody, err = AESDecrypt(data, key)
 	if err != nil {
-		return fmt.Errorf("error decrypting data: %s", err)
+		return fmt.Errorf("error decrypting data: %w", err)
 	}
 
 	// decompress message
@@ -54,7 +54,7 @@ func DecryptMessage(data []byte, key string, obj any) error {
 
 	// unmarshal message
 	if err := json.Unmarshal(decryptedBody, &obj); err != nil {
-		return fmt.Errorf("unable to unmarshal json : %s", err.Error())
+		return fmt.Errorf("unable to unmarshal json : %w", err)
 	}
 
 	return nil

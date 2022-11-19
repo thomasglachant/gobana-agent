@@ -9,7 +9,7 @@ import (
 func GetFilesMatchingPattern(pattern string) ([]string, error) {
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
-		return nil, fmt.Errorf("error while retrieve file list from pattern %s: %s", pattern, err)
+		return nil, fmt.Errorf("error while retrieve file list from pattern %s: %w", pattern, err)
 	}
 
 	fileMatches := []string{}
@@ -29,7 +29,7 @@ func GetFilesMatchingPatterns(patterns []string) ([]string, error) {
 	for _, pattern := range patterns {
 		files, err := GetFilesMatchingPattern(pattern)
 		if err != nil {
-			return nil, fmt.Errorf("error while retrieve file list patterns %s: %s", pattern, err)
+			return nil, fmt.Errorf("error while retrieve file list patterns %s: %w", pattern, err)
 		}
 		fileMatches = append(fileMatches, files...)
 	}

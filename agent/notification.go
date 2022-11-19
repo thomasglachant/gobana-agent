@@ -22,11 +22,11 @@ func SendNotification(notification Notification) error {
 	for _, recipient := range AppConfig.Alerts.Recipients {
 		if recipient.Kind == subscriptionTypeEmail {
 			if err := sendEmail(recipient.Recipient, notification); err != nil {
-				return fmt.Errorf("error sending email: %s", err.Error())
+				return fmt.Errorf("error sending email: %w", err)
 			}
 		} else if recipient.Kind == subscriptionTypeSlackWebhook {
 			if err := sendSlack(recipient.Recipient, notification); err != nil {
-				return fmt.Errorf("error sending email: %s", err.Error())
+				return fmt.Errorf("error sending email: %w", err)
 			}
 		}
 	}

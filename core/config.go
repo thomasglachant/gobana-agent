@@ -23,15 +23,15 @@ func ReadConfig(filename string, config interface{}) error {
 	var readErr error
 	data, readErr := os.ReadFile(filename)
 	if readErr != nil {
-		return fmt.Errorf("unable to open config file : %s", readErr)
+		return fmt.Errorf("unable to open config file : %w", readErr)
 	}
 	if err := yaml.Unmarshal(data, config); err != nil {
-		return fmt.Errorf("unable to decode config : %s", err)
+		return fmt.Errorf("unable to decode config : %w", err)
 	}
 
 	validationErr := CheckConfig(config)
 	if validationErr != nil {
-		return fmt.Errorf("validation error : %s", validationErr)
+		return fmt.Errorf("validation error : %w", validationErr)
 	}
 
 	return nil

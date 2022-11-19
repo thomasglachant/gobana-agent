@@ -17,7 +17,7 @@ func SendSlackNotification(webhookURL string, slackReq SlackRequest) error {
 	slackBody, _ := json.Marshal(slackReq)
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, webhookURL, bytes.NewBuffer(slackBody))
 	if err != nil {
-		return fmt.Errorf("error during call Slack : %s", err)
+		return fmt.Errorf("error during call Slack : %w", err)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -25,7 +25,7 @@ func SendSlackNotification(webhookURL string, slackReq SlackRequest) error {
 	client := &http.Client{Timeout: 10 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error during call Slack : %s", err)
+		return fmt.Errorf("error during call Slack : %w", err)
 	}
 	defer resp.Body.Close()
 
