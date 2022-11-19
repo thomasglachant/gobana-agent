@@ -30,6 +30,8 @@ fi
 for i in $(seq 1 "${NUMBER}"); do
 	if test "${TYPE}" = "json"; then
 		echo '{"message":"msg","level":400,"context":{"filename": "toto.php"}, "level_name":"'"${LEVEL}"'","channel":"request","datetime":"'${CUR_DATE}'","extra":{"app_user": "be78bf26-3714-43da-aa92-bd4a7be29d22"}}'>> "${FILENAME}"
+	elif test "${TYPE}" = "json_nginx"; then
+		echo '{"http_url":"/","http_version":"HTTP/1.1","http_status_code":401,"http_method":"HEAD","http_referer":"","http_useragent":"Zabbix 6.2.1","time_local":"19/Nov/2022:09:45:46 +0100","remote_addr":"51.91.147.220","remote_user":"","body_bytes_sent":"0","request_time":0.010,"response_content_type":"application/json","X-Forwarded-For":"51.91.147.220"}'  >> "${FILENAME}"
 	elif test "${TYPE}" = "symfony"; then
 		echo "[${CUR_DATE}] request.${LEVEL}: My message []" >> "${FILENAME}"
 	elif test "${TYPE}" = "nginx"; then
