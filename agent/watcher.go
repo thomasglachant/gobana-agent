@@ -150,7 +150,7 @@ func (watcher *WatcherProcess) startWatchFile(parser *ParserConfigStruct, file s
 
 	for line := range t.Lines {
 		go func(l *tail.Line) {
-			core.Logger.Debugf(watcherLogPrefix, "Receive line (num: %d): %s", l.Num, l.Text)
+			core.Logger.Debugf(watcherLogPrefix, "Receive line: %s", l.Text)
 
 			var entry *core.Entry
 			var err error
@@ -325,6 +325,7 @@ func (watcher *WatcherProcess) extractDate(fileWatcher *currentWatching, entry *
 				return err
 			}
 			entry.Date = date
+			core.Logger.Debugf(watcherLogPrefix, "Date parsed as: %s", date)
 		}
 	}
 
