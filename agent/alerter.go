@@ -125,11 +125,11 @@ func HandleParserTrigger(entryObj interface{}) {
 				case triggerValue.Field == "_filename":
 					fieldValue = entry.Metadata.Filename
 				default:
-					if _, ok := entry.Fields[triggerValue.Field]; !ok {
+					if _, ok := entry.Fields[triggerValue.Field]; ok {
+						fieldValue = entry.Fields[triggerValue.Field]
+					} else {
 						core.Logger.Errorf(alerterLogPrefix, "unable to check field value (field \"%s\" not exists)", triggerValue.Field)
-						continue
 					}
-					fieldValue = entry.Fields[triggerValue.Field]
 				}
 
 				match, err := checkTriggerValueMatch(fieldValue, triggerValue.Operator, triggerValue.Value)
