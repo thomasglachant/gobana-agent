@@ -10,7 +10,7 @@ import (
 
 func TranslateValidationError(err validator.FieldError, ignoreFirstNamespace bool) error {
 	field, validationErr := ExtractValidationError(err, ignoreFirstNamespace)
-	return fmt.Errorf("%w %s", field, validationErr)
+	return fmt.Errorf("%s %w", field, validationErr)
 }
 
 //nolint:gocyclo
