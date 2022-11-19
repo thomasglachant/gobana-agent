@@ -31,18 +31,18 @@ build: $(BASE) ; $(info $(M) building executable…) @ ## Build program binary (
 		-o $(BIN)/$(APPNAME) main.go
 
 .PHONY: start
-start: build $(BASE) ; $(info $(M) launch agent...) @ ## Launch application
+start: build $(BASE) ; $(info $(M) launch agent…) @ ## Launch application
 	@$(BIN)/$(APPNAME) $(RUN_ARGS) $(if $(config), -config=$(config), "")
 
 $(GOLINT): | $(BASE) ; $(info $(M) building lint…)
-	$Q GOPATH=$(shell go env GOPATH) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.49.0
+	$Q GOPATH=$(shell go env GOPATH) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
 
 .PHONY: lint
-lint: $(BASE) $(GOLINT) ; $(info $(M) apply linter…) @ ## Run lint
+lint: $(BASE) fmt $(GOLINT) ; $(info $(M) apply linter…) @ ## Run lint
 	$Q cd $(BASE) && $(GOLINT) run --color auto --fix
 
 $(GOFMT): | $(BASE) ; $(info $(M) building fmt…)
-	$Q GOPATH=$(shell go env GOPATH) go install mvdan.cc/gofumpt@v0.3.1
+	$Q GOPATH=$(shell go env GOPATH) go install mvdan.cc/gofumpt@v0.4.0
 
 .PHONY: fmt
 fmt: $(BASE) $(GOFMT) ; $(info $(M) running gofmt…) @ ## Run gofmt on all source files
@@ -64,10 +64,10 @@ upgrade-dependencies: ; $(info $(M) upgrading dependencies…)
 ##
 ## test
 .PHONY: test
-test: lint build test-unit ## Run tests
+test: fmt lint build test-unit ## Run tests
 
 .PHONY: test-unit
-test-unit: ; $(info $(M) run tests…)  ## Run tests
+test-unit: ; $(info $(M) run unit tests…)  ## Run tests
 	$(GO) test -v ./...
 
 ##
