@@ -264,8 +264,8 @@ func (watcher *WatcherProcess) handleParseJSON(fileWatcher *currentWatching, ent
 		return fmt.Errorf("unable to parse line as json: %w (line: %s)", err, line)
 	}
 	for internalFieldName, jsonField := range fileWatcher.parser.JSONFields {
-		// json field contain "." => use json path
-		if strings.Contains(jsonField, ".") {
+		// json key not exists and key contain "." => use json path
+		if _, ok := jsonData[jsonField]; !ok && strings.Contains(jsonField, ".") {
 			splitByDot := strings.Split(jsonField, ".")
 			var cur interface{} = jsonData
 			if len(splitByDot) > 1 {
