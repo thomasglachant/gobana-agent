@@ -15,7 +15,7 @@ type ParserConfigStruct struct {
 	RegexPattern  string            `yaml:"regex_pattern" validate:"required_if=Mode regex"`
 	JSONFields    map[string]string `yaml:"json_fields" validate:"required_if=Mode json,dive,required"`
 	FilesIncluded []string          `yaml:"files_included" validate:"required,gte=1,dive,required"`
-	FilesExcluded []string          `yaml:"files_excluded" validate:"dive,file,required"`
+	FilesExcluded []string          `yaml:"files_excluded" validate:"dive,required"`
 	DateExtract   struct {
 		Field  string `yaml:"field"`
 		Format string `yaml:"format"`
