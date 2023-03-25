@@ -1,11 +1,10 @@
 # Gobana
 
-Gobana is a simple, fast, and powerful log monitoring tool.
+Gobana is a simple and fast log monitoring tool.
 
-You can use agent only to monitor log files and configure alerting,
-or you can use agent + server to centralize log monitoring.
+You can use agent to monitor log files and configure alerting.
 
-## Agent mode
+## Basic usage
 
 First, you must create a configuration file `config.yml`.
 
