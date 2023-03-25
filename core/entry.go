@@ -5,7 +5,6 @@ import "time"
 type EntryMetadata struct {
 	AgentVersion string    `json:"agent_version" yaml:"agent_version"`
 	Application  string    `json:"application" yaml:"application"`
-	Workspace    string    `json:"workspace" yaml:"workspace"`
 	Server       string    `json:"server" yaml:"server"`
 	Filename     string    `json:"filename" yaml:"filename"`
 	Parser       string    `json:"parser" yaml:"parser"`

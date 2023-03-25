@@ -6,7 +6,6 @@ var (
 	// services
 	Alerter *AlerterProcess
 	Watcher *WatcherProcess
-	Emitter *EmitterProcess
 )
 
 var AppVersion = "?"

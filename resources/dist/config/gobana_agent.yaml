@@ -103,25 +103,6 @@ alerts: # (optional)
 #            recipient: "https://hooks.slack.com/services/XXXX/XXXXX/XXXXX"
 
 #
-# Centralized storage of logs
-#
-emitter:
-    ## Is cloud storage enabled ? (optional)
-    enabled: false
-    
-    ## Workspace ID (required if enabled)
-    workspace: "myapplication"
-    
-    ## Server ip or domain (required if enabled)
-    server: "localhost"
-    
-    ## Server port (optional)
-    # port: 59302
-    
-    ## Server secret (required if enabled)
-    secret: "secret"
-
-#
 # SMTP configuration (optional but required for email notification)
 #
 smtp:

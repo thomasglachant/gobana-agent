@@ -195,7 +195,6 @@ func (watcher *WatcherProcess) handleLine(fileWatcher *currentWatching, line *ta
 		Metadata: core.EntryMetadata{
 			AgentVersion: AppVersion,
 			Application:  AppConfig.Application,
-			Workspace:    AppConfig.Emitter.WorkspaceID,
 			Server:       AppConfig.Server,
 			Filename:     fileWatcher.fileName,
 			Parser:       fileWatcher.parser.Name,

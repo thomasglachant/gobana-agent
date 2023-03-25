@@ -66,10 +66,5 @@ func main() {
 		&core.ProcessStruct{RunningProcess: agent.Alerter},
 	}
 
-	if agent.AppConfig.Emitter.Enabled {
-		agent.Emitter = &agent.EmitterProcess{}
-		processes = append(processes, &core.ProcessStruct{RunningProcess: agent.Emitter})
-	}
-
 	core.RunProcesses(processes)
 }
