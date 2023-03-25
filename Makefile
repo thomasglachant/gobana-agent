@@ -35,7 +35,7 @@ start: build $(BASE) ; $(info $(M) launch agent…) @ ## Launch application
 	@$(BIN)/$(APPNAME) $(RUN_ARGS) $(if $(config), -config=$(config), "")
 
 $(GOLINT): | $(BASE) ; $(info $(M) building lint…)
-	$Q GOPATH=$(shell go env GOPATH) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+	$Q GOPATH=$(shell go env GOPATH) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52.1
 
 .PHONY: lint
 lint: $(BASE) fmt $(GOLINT) ; $(info $(M) apply linter…) @ ## Run lint

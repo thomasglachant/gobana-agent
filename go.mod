@@ -1,6 +1,6 @@
 module gobana-agent
 
-go 1.19
+go 1.20
 
 require (
 	github.com/creasty/defaults v1.7.0
